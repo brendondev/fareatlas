@@ -109,21 +109,20 @@ export const PRICING = {
     locked: [
       "Premium Economy, Business & First award search",
       "Full 12-month award window",
-      "Unlimited custom flight alerts (email)",
+      "Route alerts by email",
       "Expert guides & priority routes",
     ],
   },
   premium: {
     name: "Premium",
     price: "Coming soon",
-    period: "Every seat, every alert, every guide",
-    cta: "Join waitlist",
+    period: "Every cabin, the full year, every guide",
+    cta: "Join the waitlist",
     href: "/pricing#waitlist",
     includes: [
       "Everything in Free",
       "All cabins — Economy through First",
       "Full 12-month award search window",
-      "Unlimited route & cabin alerts",
       "Cash vs points decision helpers",
       "Priority for new programs and tools",
     ],
@@ -131,32 +130,22 @@ export const PRICING = {
   },
 } as const;
 
-export const RECENT_AWARDS = [
-  {
-    from: "SYD",
-    to: "SCL",
-    cabin: "Business",
-    program: "Qantas",
-    seats: 2,
-    points: "108,000",
-    ago: "Just now",
-  },
-  {
-    from: "MEL",
-    to: "SCL",
-    cabin: "Prem. Economy",
-    program: "Qantas",
-    seats: 4,
-    points: "82,000",
-    ago: "5 min ago",
-  },
-  {
-    from: "SYD",
-    to: "LAX",
-    cabin: "Economy",
-    program: "Qantas",
-    seats: 8,
-    points: "45,000",
-    ago: "12 min ago",
-  },
-] as const;
+/*
+ * RECENT_AWARDS used to live here: three hardcoded routes rendered on /flights
+ * with "Just now" / "5 min ago" timestamps.
+ *
+ * That was not a mock — it was a claim about the product's activity, shown to
+ * users as real. FareAtlas is Australia-first, so the ACCC is the regulator and
+ * ACL s.18 (misleading or deceptive conduct) is live exposure. For a product
+ * whose whole pitch is an honest points-vs-cash comparison it was also a
+ * positioning own-goal.
+ *
+ * If social proof belongs on /flights, it should be built from real rows in
+ * AwardSearchCache, which already stores payloads and a dayKey. Until then,
+ * nothing.
+ *
+ * Note also what is NOT in the Premium list above: SMS alerts. There is no
+ * Twilio account, no dependency and no plan for one. Email alerts sit under
+ * free.locked because nothing reads AwardWatch and sends anything yet — which
+ * is why Premium still says "Coming soon" rather than taking money.
+ */

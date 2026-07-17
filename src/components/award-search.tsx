@@ -7,6 +7,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { UpgradePanel } from "@/components/upgrade-panel";
 import type { AwardResult } from "@/lib/seats-aero";
 
 type SearchResponse = {
@@ -19,7 +20,24 @@ type SearchResponse = {
     dayKey?: string | null;
     hitCount?: number;
   };
+  entitlements?: {
+    tier?: "free" | "premium";
+    clamped?: { cabins: boolean; startDate: boolean; endDate: boolean };
+    clampedAtAll?: boolean;
+  };
+  query?: {
+    startDate?: string;
+    endDate?: string;
+    cabins?: string | null;
+  };
 };
+
+const CABIN_OPTIONS = [
+  { value: "economy", label: "Economy", code: "Y" },
+  { value: "premium", label: "Premium Eco.", code: "W" },
+  { value: "business", label: "Business", code: "J" },
+  { value: "first", label: "First", code: "F" },
+] as const;
 
 function isoDate(daysAhead: number): string {
   const d = new Date();
@@ -32,7 +50,38 @@ function formatPoints(value: number | null | undefined): string {
   return new Intl.NumberFormat("en-AU").format(value);
 }
 
-export function AwardSearch({ configured }: { configured: boolean }) {
+/** Says exactly what was trimmed, rather than a vague "upgrade for more". */
+function buildClampMessage(
+  clamped: { cabins: boolean; startDate: boolean; endDate: boolean } | undefined,
+  window: string | null,
+): string {
+  const parts: string[] = [];
+  if (clamped?.cabins) {
+    parts.push("Free covers Economy, so premium cabins were left out");
+  }
+  if (clamped?.endDate) {
+    parts.push(
+      window
+        ? `the search window was trimmed to ${window}`
+        : "the search window was trimmed to 90 days",
+    );
+  }
+  if (!parts.length) return "Premium opens every cabin and the full year.";
+
+  const joined =
+    parts.length === 1 ? parts[0]! : `${parts[0]} and ${parts[1]}`;
+  return `${joined.charAt(0).toUpperCase()}${joined.slice(1)}. Premium opens Premium Economy, Business and First across the full 12 months.`;
+}
+
+export function AwardSearch({
+  configured,
+  tier,
+  signedIn,
+}: {
+  configured: boolean;
+  tier: "free" | "premium";
+  signedIn: boolean;
+}) {
   const defaults = useMemo(
     () => ({
       origin: "SYD",
@@ -47,7 +96,12 @@ export function AwardSearch({ configured }: { configured: boolean }) {
   const [destination, setDestination] = useState(defaults.destination);
   const [startDate, setStartDate] = useState(defaults.startDate);
   const [endDate, setEndDate] = useState(defaults.endDate);
+  const [cabins, setCabins] = useState<string[]>(["economy"]);
   const [directOnly, setDirectOnly] = useState(false);
+  const [clamped, setClamped] = useState<SearchResponse["entitlements"] | null>(
+    null,
+  );
+  const [searchedWindow, setSearchedWindow] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<AwardResult[] | null>(null);
@@ -92,6 +146,7 @@ export function AwardSearch({ configured }: { configured: boolean }) {
           take: "80",
           order_by: "lowest_mileage",
         });
+        if (cabins.length) params.set("cabins", cabins.join(","));
         if (directOnly) params.set("only_direct", "true");
 
         const res = await fetch(`/api/awards/search?${params.toString()}`);
@@ -100,11 +155,20 @@ export function AwardSearch({ configured }: { configured: boolean }) {
         if (!res.ok) {
           setResults(null);
           setCacheLabel(null);
+          setClamped(null);
           setError(data.error ?? data.detail ?? "Search failed.");
           return;
         }
 
         setResults(data.results ?? []);
+        setClamped(data.entitlements ?? null);
+        // Report the window that was actually searched, which after clamping
+        // may not be the one in the date inputs.
+        setSearchedWindow(
+          data.query?.startDate && data.query?.endDate
+            ? `${data.query.startDate} → ${data.query.endDate}`
+            : null,
+        );
         if (data.cache?.source === "cache") {
           setCacheLabel(
             `served from Neon cache${
@@ -128,7 +192,7 @@ export function AwardSearch({ configured }: { configured: boolean }) {
         setLoading(false);
       }
     },
-    [configured, destination, directOnly, endDate, origin, startDate],
+    [cabins, configured, destination, directOnly, endDate, origin, startDate],
   );
 
   const loadTrips = useCallback(
@@ -236,12 +300,50 @@ export function AwardSearch({ configured }: { configured: boolean }) {
         </label>
         <div className="flex items-end">
           <button
-            className="btn btn-primary h-11 w-full"
+            className="btn btn-accent h-11 w-full"
             disabled={loading}
             type="submit"
           >
             {loading ? "Searching…" : "Search awards"}
           </button>
+        </div>
+
+        <div className="md:col-span-2 xl:col-span-6">
+          <p className="text-xs font-semibold text-[var(--muted)]">Cabins</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {CABIN_OPTIONS.map((option) => {
+              const locked = tier === "free" && option.value !== "economy";
+              const active = cabins.includes(option.value);
+              return (
+                <button
+                  aria-pressed={active}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                    active
+                      ? "border-[var(--accent)] bg-[var(--accent)] text-[#0b0d10]"
+                      : locked
+                        ? "border-dashed border-[var(--accent)]/40 text-[var(--muted)]"
+                        : "border-[var(--line)] bg-[var(--soft)] text-[var(--ink-soft)] hover:border-[var(--line-strong)]"
+                  }`}
+                  key={option.value}
+                  onClick={() =>
+                    setCabins((current) =>
+                      current.includes(option.value)
+                        ? current.filter((c) => c !== option.value)
+                        : [...current, option.value],
+                    )
+                  }
+                  type="button"
+                >
+                  <span className="font-display">{option.code}</span>
+                  {option.label}
+                  {/* Locked cabins stay clickable on purpose: the server
+                      clamps and answers with the upsell, which teaches more
+                      than a dead control does. */}
+                  {locked ? <span aria-label="Premium">🔒</span> : null}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </form>
 
@@ -249,6 +351,14 @@ export function AwardSearch({ configured }: { configured: boolean }) {
         <p className="rounded-2xl bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)] ring-1 ring-[var(--danger)]/25">
           {error}
         </p>
+      ) : null}
+
+      {clamped?.clampedAtAll ? (
+        <UpgradePanel
+          body={buildClampMessage(clamped.clamped, searchedWindow)}
+          signedIn={signedIn}
+          title="Showing what your plan covers"
+        />
       ) : null}
 
       {results ? (

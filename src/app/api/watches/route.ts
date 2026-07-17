@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getViewer } from "@/lib/dal";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
+import { entitlementsFor } from "@/lib/entitlements";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const IATA = /^[A-Za-z]{3}$/;
@@ -42,9 +44,33 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const viewer = await getViewer();
+    const limit = entitlementsFor(viewer.tier).maxWatches;
+
+    // Signed-in watches are counted against the plan. Anonymous ones are keyed
+    // only by an unverified email, so counting them would let anybody exhaust a
+    // stranger's allowance by typing their address.
+    if (viewer.user && Number.isFinite(limit)) {
+      const existing = await prisma.awardWatch.count({
+        where: { userId: viewer.user.id, status: "active" },
+      });
+
+      if (existing >= limit) {
+        return NextResponse.json(
+          {
+            error: `The free plan covers ${limit} watched routes. Remove one, or go Premium for unlimited.`,
+            tier: viewer.tier,
+            limit,
+          },
+          { status: 403 },
+        );
+      }
+    }
+
     const watch = await prisma.awardWatch.create({
       data: {
         email,
+        userId: viewer.user?.id,
         origin,
         destination,
         cabins,

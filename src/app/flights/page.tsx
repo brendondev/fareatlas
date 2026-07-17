@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { AwardSearch } from "@/components/award-search";
 import { AwardWatchForm } from "@/components/award-watch-form";
-import { CABINS, RECENT_AWARDS } from "@/lib/content";
+import { CABINS } from "@/lib/content";
+import { getViewer } from "@/lib/dal";
 import { getCashFares } from "@/lib/offers";
 import { isSeatsAeroConfigured } from "@/lib/seats-aero";
 
@@ -19,6 +20,9 @@ const money = new Intl.NumberFormat("en-AU", {
 
 export default async function FlightsPage() {
   const configured = isSeatsAeroConfigured();
+  // Only decides which controls to draw. The API clamps regardless of what
+  // gets sent — see lib/awards.ts.
+  const viewer = await getViewer();
   const { fares, source } = await getCashFares(4);
 
   return (
@@ -68,7 +72,11 @@ export default async function FlightsPage() {
             </span>
           </div>
           <div className="mt-5">
-            <AwardSearch configured={configured} />
+            <AwardSearch
+              configured={configured}
+              signedIn={Boolean(viewer.user)}
+              tier={viewer.tier}
+            />
           </div>
         </div>
 
@@ -98,27 +106,10 @@ export default async function FlightsPage() {
             </div>
           </div>
 
-          <div className="card p-5">
-            <h2 className="text-lg font-bold">Recent signals</h2>
-            <div className="mt-4 space-y-2">
-              {RECENT_AWARDS.map((row) => (
-                <div
-                  className="rounded-xl bg-[var(--soft)] px-3 py-2.5 text-sm"
-                  key={`${row.from}-${row.to}-${row.points}`}
-                >
-                  <div className="flex justify-between gap-2 font-semibold">
-                    <span>
-                      {row.from} → {row.to}
-                    </span>
-                    <span className="text-[var(--accent)]">{row.points}</span>
-                  </div>
-                  <p className="mt-0.5 text-xs text-[var(--muted)]">
-                    {row.cabin} · {row.program} · {row.ago}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* A "Recent signals" panel stood here, built from three hardcoded
+              routes stamped "Just now" / "5 min ago". It was fabricated
+              activity presented as live — see the note in lib/content.ts. It
+              comes back when it can be built from real AwardSearchCache rows. */}
 
           <AwardWatchForm />
         </div>

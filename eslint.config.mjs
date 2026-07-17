@@ -6,10 +6,13 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    // The Seats.aero client talks to the Partner API with whatever params it is
-    // handed. Reaching it directly skips the Neon day-cache (burning quota) and,
-    // from Phase 4 on, skips Free/Premium clamping. `lib/seats-aero/with-cache`
-    // is the only sanctioned door.
+    // Award data has exactly one sanctioned door: `lib/awards.ts`, which clamps
+    // the query to the viewer's tier before it can reach the Partner API or the
+    // cache key. Everything banned here is a way around that clamp:
+    //   - `seats-aero/client` calls the API with whatever it is handed
+    //   - `searchAwardsCached`/`getTripsCached` cache, but do not gate
+    // Without this rule the clamp is a convention someone forgets; with it,
+    // there is no unclamped path to forget.
     files: ["src/app/**", "src/components/**"],
     rules: {
       "no-restricted-imports": [
@@ -19,7 +22,19 @@ const eslintConfig = defineConfig([
             {
               name: "@/lib/seats-aero/client",
               message:
-                "Import from '@/lib/seats-aero' instead — the raw client bypasses the Neon cache and tier clamping.",
+                "Use '@/lib/awards' — the raw client skips the Neon cache and tier clamping.",
+            },
+            {
+              name: "@/lib/seats-aero",
+              importNames: ["searchAwardsCached", "getTripsCached"],
+              message:
+                "Use searchAwardsForViewer/getTripsForViewer from '@/lib/awards' — these skip Free/Premium clamping.",
+            },
+            {
+              name: "@/lib/api",
+              importNames: ["searchAwardsCached", "getTripsCached"],
+              message:
+                "Use searchAwardsForViewer/getTripsForViewer from '@/lib/awards' — these skip Free/Premium clamping.",
             },
           ],
         },

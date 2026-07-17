@@ -1,13 +1,6 @@
 import Link from "next/link";
 import { OfferCard } from "@/components/offer-card";
-import {
-  CABINS,
-  FEATURES,
-  PRICING,
-  RECENT_AWARDS,
-  SITE,
-  STEPS,
-} from "@/lib/content";
+import { CABINS, FEATURES, PRICING, SITE, STEPS } from "@/lib/content";
 import { getCashFares, getOffers } from "@/lib/offers";
 import { PROGRAMS } from "@/lib/programs";
 
@@ -233,8 +226,8 @@ export default async function HomePage() {
                 with cash alternatives so you redeem with intent.
               </p>
             </div>
-            <div className="grid gap-3 p-5 sm:grid-cols-3">
-              {CABINS.slice(0, 3).map((cabin) => (
+            <div className="grid gap-3 p-5 sm:grid-cols-2">
+              {CABINS.map((cabin) => (
                 <div
                   className="rounded-2xl bg-[var(--soft)] p-4"
                   key={cabin.code}
@@ -249,30 +242,18 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
+            {/* A list of fabricated "Recent award signals" sat here — see the
+                note in lib/content.ts. Replaced with the real cabin ladder,
+                which is honest and does the upsell better anyway. */}
             <div className="border-t border-[var(--line)] px-5 py-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-                Recent award signals
+                Search live Seats.aero inventory
               </p>
-              <div className="mt-3 space-y-2">
-                {RECENT_AWARDS.map((row) => (
-                  <div
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[var(--soft)] px-3 py-2.5 text-sm"
-                    key={`${row.from}-${row.to}-${row.cabin}`}
-                  >
-                    <span className="font-semibold">
-                      {row.from} ✈ {row.to}
-                    </span>
-                    <span className="text-[var(--muted)]">
-                      {row.cabin} · {row.program}
-                    </span>
-                    <span className="tabular font-bold text-[var(--accent)]">
-                      {row.points} pts
-                    </span>
-                    <span className="text-xs text-[var(--muted)]">{row.ago}</span>
-                  </div>
-                ))}
-              </div>
-              <Link className="btn btn-primary mt-4" href="/flights">
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+                Economy is free forever. Premium Economy, Business and First
+                come with Premium.
+              </p>
+              <Link className="btn btn-accent mt-4" href="/flights">
                 Open award search
               </Link>
             </div>

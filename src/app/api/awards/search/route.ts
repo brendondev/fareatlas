@@ -3,9 +3,10 @@ import {
   AU_FOCUS_SOURCES,
   isSeatsAeroConfigured,
   mapSearchResults,
-  searchAwardsCached,
   SeatsAeroError,
 } from "@/lib/seats-aero";
+import { searchAwardsForViewer } from "@/lib/awards";
+import { isAuthConfigured } from "@/lib/auth-config";
 import { isDatabaseConfigured } from "@/lib/db";
 
 const IATA = /^[A-Za-z]{3}(,[A-Za-z]{3})*$/;
@@ -119,10 +120,19 @@ export async function GET(request: NextRequest) {
   };
 
   try {
-    const cached = await searchAwardsCached(searchParams, {
-      refresh: bypassCache,
-    });
-    const { response, source, dayKey, hitCount: cacheHits } = cached;
+    // The viewer's tier clamps these params before they reach the Partner API
+    // or the cache key. `searchAwardsCached` is deliberately unreachable from
+    // here — see lib/awards.ts.
+    const gated = await searchAwardsForViewer(searchParams);
+    const {
+      response,
+      source,
+      dayKey,
+      hitCount: cacheHits,
+      tier,
+      clamped,
+      clampedAtAll,
+    } = gated;
 
     const results = mapSearchResults(response.data ?? []);
 
@@ -135,13 +145,20 @@ export async function GET(request: NextRequest) {
         hitCount: cacheHits,
         bypassed: bypassCache,
       },
+      auth: { configured: isAuthConfigured() },
+      entitlements: { tier, clamped, clampedAtAll },
       query: {
         origin: origin.toUpperCase(),
         destination: destination.toUpperCase(),
-        startDate,
-        endDate,
+        // Echo what was actually asked of the API, not what the caller typed —
+        // otherwise a clamped search reports a window it never searched.
+        startDate: gated.params.startDate ?? startDate,
+        endDate: gated.params.endDate ?? endDate,
+        requestedStartDate: startDate,
+        requestedEndDate: endDate,
         sources,
-        cabins: cabins ?? null,
+        cabins: gated.params.cabins ?? null,
+        requestedCabins: cabins ?? null,
         take,
         skip: skip ?? 0,
       },

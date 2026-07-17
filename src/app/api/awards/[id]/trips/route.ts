@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  getTripsCached,
   isSeatsAeroConfigured,
   programLabel,
   SeatsAeroError,
 } from "@/lib/seats-aero";
+import { getTripsForViewer } from "@/lib/awards";
+import { isAuthConfigured } from "@/lib/auth-config";
 import { isDatabaseConfigured } from "@/lib/db";
 
 type RouteContext = {
@@ -38,11 +39,20 @@ export async function GET(request: NextRequest, context: RouteContext) {
     request.nextUrl.searchParams.get("refresh") === "true";
 
   try {
-    const cached = await getTripsCached(id, {
+    // Cabins above the viewer's tier are dropped from the payload here, not
+    // hidden in the UI — trip detail for a Business award is premium data.
+    const cached = await getTripsForViewer(id, {
       includeFiltered,
       refresh: bypassCache,
     });
-    const { response, source, dayKey, hitCount: cacheHits } = cached;
+    const {
+      response,
+      source,
+      dayKey,
+      hitCount: cacheHits,
+      tier,
+      filteredCount,
+    } = cached;
 
     const trips = (response.data ?? []).map((trip) => ({
       id: trip.ID,
@@ -82,6 +92,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
         dayKey,
         hitCount: cacheHits,
         bypassed: bypassCache,
+      },
+      auth: { configured: isAuthConfigured() },
+      entitlements: {
+        tier,
+        // How many itineraries this plan can't see. The count is safe to
+        // reveal — it's the upsell — while the payloads are gone.
+        hiddenByTier: filteredCount,
       },
       count: trips.length,
       trips,

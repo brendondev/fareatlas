@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AwardWatchForm } from "@/components/award-watch-form";
+import { WaitlistForm } from "@/components/waitlist-form";
 import { PRICING } from "@/lib/content";
+import { getViewer } from "@/lib/dal";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
     "Start free with offers and Economy awards. Premium unlocks every cabin, longer windows and unlimited alerts.",
 };
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const viewer = await getViewer();
+
   return (
     <main className="container-wide py-10 sm:py-14">
       <div className="mx-auto max-w-2xl text-center">
@@ -29,10 +32,12 @@ export default function PricingPage() {
       </div>
 
       <section className="mx-auto mt-14 max-w-2xl" id="waitlist">
-        <AwardWatchForm />
-        <p className="mt-4 text-center text-sm text-[var(--muted)]">
-          Premium billing (Stripe) and email alerts (Resend) are next. For now,
-          leave a route watch with your email.
+        <WaitlistForm defaultEmail={viewer.user?.email} />
+        <p className="mt-4 text-center text-xs leading-relaxed text-[var(--muted)]">
+          Straight answer on what Premium isn&apos;t yet: there is no billing,
+          and route alerts don&apos;t send. We save the routes you watch so
+          they&apos;re ready the day alerting ships — nothing emails you before
+          then.
         </p>
       </section>
     </main>
