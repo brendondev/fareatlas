@@ -4,7 +4,7 @@ import { SITE } from "@/lib/content";
 export function SiteFooter() {
   return (
     <footer className="mt-20 border-t border-[var(--line)] bg-[#171f2f] text-white">
-      <div className="container-wide grid gap-10 py-12 md:grid-cols-[1.3fr_1fr_1fr]">
+      <div className="container-wide grid gap-10 py-12 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
         <div>
           <p className="text-lg font-bold">{SITE.name}</p>
           <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/65">
@@ -26,6 +26,20 @@ export function SiteFooter() {
           </div>
         </div>
         <div>
+          <p className="text-sm font-semibold text-white/90">Company</p>
+          <div className="mt-3 flex flex-col gap-2 text-sm text-white/65">
+            <Link className="hover:text-white" href="/contact">
+              Contact
+            </Link>
+            <Link className="hover:text-white" href="/privacy">
+              Privacy
+            </Link>
+            <Link className="hover:text-white" href="/terms">
+              Terms
+            </Link>
+          </div>
+        </div>
+        <div>
           <p className="text-sm font-semibold text-white/90">Australia-first</p>
           <p className="mt-3 text-sm leading-relaxed text-white/65">
             Built for Qantas, Velocity, Everyday Rewards and Flybuys — with cash
@@ -34,9 +48,18 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="container-wide flex flex-col gap-2 py-5 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {SITE.name}. All rights reserved.</p>
-          <p>Award data via Seats.aero · Cash comparison coming via Amadeus</p>
+        <div className="container-wide space-y-3 py-5 text-xs text-white/45">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} {SITE.name}. All rights reserved.</p>
+            <p>Award data via Seats.aero · Cash comparison coming via Amadeus</p>
+          </div>
+          <p className="max-w-3xl leading-relaxed">
+            Not affiliated with or endorsed by Qantas, Virgin Australia,
+            Everyday Rewards, Flybuys or any airline or loyalty program. Trade
+            marks belong to their owners. Points prices and seat availability
+            change without notice — always confirm with the program before you
+            book or transfer.
+          </p>
         </div>
       </div>
     </footer>

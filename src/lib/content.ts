@@ -6,6 +6,18 @@ export const SITE = {
   locale: "en-AU",
 } as const;
 
+/**
+ * TODO(brendon): every value here is a placeholder and must be replaced with
+ * real business details before launch. `contactEmail` is rendered on /contact
+ * and in the legal pages — if it does not resolve to a real inbox, enquiries
+ * bounce silently and the privacy policy names a channel that does not exist.
+ */
+export const LEGAL = {
+  contactEmail: "hello@fareatlas.example",
+  entity: "FareAtlas",
+  lastUpdated: "17 July 2026",
+} as const;
+
 export const FEATURES = [
   {
     title: "Points earn opportunities",
