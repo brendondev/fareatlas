@@ -22,8 +22,11 @@ model LoyaltyProgram {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  offers       Offer[]
-  userPrograms UserProgram[]
+  offers        Offer[]
+  userPrograms  UserProgram[]
+  wineDeals     WineDeal[]
+  giftCardRates GiftCardRate[]
+  cardOffers    CardOffer[]
 }
 
 /// A registered account. Identity used to live as a loose email string on
@@ -164,6 +167,80 @@ model AwardWatch {
   @@index([email, status])
   @@index([userId, status])
   @@index([origin, destination])
+}
+
+/// Wine bonus-point deals (Qantas Wine, Virgin Wine). Editorial, curated.
+///
+/// Stores inputs only. The ranking metric — cost per 1,000 bonus points — is a
+/// pure function of priceAud and bonusPoints (see lib/verticals.ts) and is NOT
+/// a column: persisting a derived value means it silently goes stale the day
+/// someone edits priceAud in the console, which is the programs-vs-seed drift
+/// bug all over again. `bottles` is here so the UI can show $/bottle beside the
+/// points cost — ranking a $200 case above a $60 one on points alone is
+/// correct and useless.
+model WineDeal {
+  id          String         @id @default(cuid())
+  programId   String
+  program     LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  vendor      String // "Qantas Wine" | "Virgin Wine"
+  bonusPoints Int
+  priceAud    Float
+  bottles     Int?
+  url         String?
+  status      String         @default("published")
+  expiresAt   DateTime?
+  publishedAt DateTime       @default(now())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status, publishedAt])
+}
+
+/// Gift-card earn rates. `pointsPerDollar` is an input here (the advertised
+/// rate), not a derivative, so it is stored and indexed for ranking.
+model GiftCardRate {
+  id              String         @id @default(cuid())
+  programId       String
+  program         LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  retailer        String
+  channel         String // "Qantas Marketplace" | "Velocity Store"
+  pointsPerDollar Float
+  minSpendAud     Float?
+  capAud          Float?
+  url             String?
+  status          String         @default("published")
+  expiresAt       DateTime?
+  publishedAt     DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([status, pointsPerDollar])
+}
+
+/// Credit-card sign-up bonuses. First-year fee sits next to the bonus so the UI
+/// can derive cost per 1,000 bonus points (feeFirstYear / bonus × 1000) — the
+/// same axis as wine, making cards and wine directly comparable.
+model CardOffer {
+  id              String          @id @default(cuid())
+  programId       String?
+  program         LoyaltyProgram? @relation(fields: [programId], references: [id])
+  issuer          String
+  cardName        String
+  bonusPoints     Int
+  minSpendAud     Float?
+  spendWindowDays Int?
+  annualFeeAud    Float?
+  feeFirstYearAud Float?
+  eligibility     String?
+  url             String?
+  status          String          @default("published")
+  expiresAt       DateTime?
+  publishedAt     DateTime        @default(now())
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([status, bonusPoints])
 }
 
 /// Cached cash fare snapshots (Amadeus later; seed for demo).

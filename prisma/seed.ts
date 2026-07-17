@@ -183,6 +183,95 @@ async function main() {
     });
   }
 
+  // Verticals — curated editorial data. There is no public feed for these, so
+  // hand-curation is the point. Seeded only when empty, matching offers/cash.
+  if ((await prisma.wineDeal.count()) === 0) {
+    await prisma.wineDeal.createMany({
+      data: [
+        {
+          programId: bySlug.qantas!,
+          title: "Mixed dozen with bonus points",
+          vendor: "Qantas Wine",
+          bonusPoints: 6000,
+          priceAud: 189,
+          bottles: 12,
+        },
+        {
+          programId: bySlug.velocity!,
+          title: "Premium reds six-pack",
+          vendor: "Virgin Wine",
+          bonusPoints: 4000,
+          priceAud: 149,
+          bottles: 6,
+        },
+        {
+          programId: bySlug.qantas!,
+          title: "Champagne case bonus offer",
+          vendor: "Qantas Wine",
+          bonusPoints: 15000,
+          priceAud: 499,
+          bottles: 12,
+        },
+      ],
+    });
+  }
+
+  if ((await prisma.giftCardRate.count()) === 0) {
+    await prisma.giftCardRate.createMany({
+      data: [
+        {
+          programId: bySlug.qantas!,
+          retailer: "Woolworths",
+          channel: "Qantas Marketplace",
+          pointsPerDollar: 3,
+        },
+        {
+          programId: bySlug.velocity!,
+          retailer: "Coles Group & Myer",
+          channel: "Velocity Store",
+          pointsPerDollar: 2.5,
+          capAud: 5000,
+        },
+        {
+          programId: bySlug.qantas!,
+          retailer: "JB Hi-Fi",
+          channel: "Qantas Marketplace",
+          pointsPerDollar: 2,
+          minSpendAud: 50,
+        },
+      ],
+    });
+  }
+
+  if ((await prisma.cardOffer.count()) === 0) {
+    await prisma.cardOffer.createMany({
+      data: [
+        {
+          programId: bySlug.qantas!,
+          issuer: "Major Bank",
+          cardName: "Qantas Premier Platinum",
+          bonusPoints: 90000,
+          minSpendAud: 4500,
+          spendWindowDays: 90,
+          annualFeeAud: 349,
+          feeFirstYearAud: 175,
+          eligibility: "New cardholders only",
+        },
+        {
+          programId: bySlug.velocity!,
+          issuer: "Major Bank",
+          cardName: "Velocity Rewards Signature",
+          bonusPoints: 60000,
+          minSpendAud: 3000,
+          spendWindowDays: 90,
+          annualFeeAud: 289,
+          feeFirstYearAud: 0,
+          eligibility: "No cards from this issuer in 18 months",
+        },
+      ],
+    });
+  }
+
   await prisma.appSetting.upsert({
     where: { key: "seeded_at" },
     create: { key: "seeded_at", value: new Date().toISOString() },

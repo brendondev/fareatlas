@@ -6,8 +6,16 @@ import { useState } from "react";
 import { SITE } from "@/lib/content";
 import type { Viewer } from "@/lib/dal";
 
+// "Earn" groups the accumulation verticals — seven flat links overflowed the
+// bar, and these belong together conceptually (ways to earn points on spend).
+const EARN = [
+  { href: "/offers", label: "Offers", hint: "Bonus point promotions" },
+  { href: "/wine", label: "Wine", hint: "Ranked by cost per 1,000 points" },
+  { href: "/gift-cards", label: "Gift cards", hint: "Best points per dollar" },
+  { href: "/cards", label: "Cards & perks", hint: "Sign-up bonuses" },
+];
+
 const NAV = [
-  { href: "/offers", label: "Offers" },
   { href: "/flights", label: "Flights" },
   { href: "/guides", label: "Guides" },
   { href: "/pricing", label: "Pricing" },
@@ -21,7 +29,11 @@ const NAV = [
 export function SiteHeader({ viewer }: { viewer: Viewer }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [earnOpen, setEarnOpen] = useState(false);
   const { authConfigured, user } = viewer;
+  const earnActive = EARN.some(
+    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
+  );
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(11,13,16,0.72)] backdrop-blur-xl">
@@ -41,6 +53,50 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
+          {/* Earn dropdown — hover/focus-within, so it works without JS too. */}
+          <div
+            className="relative"
+            onMouseEnter={() => setEarnOpen(true)}
+            onMouseLeave={() => setEarnOpen(false)}
+          >
+            <button
+              aria-expanded={earnOpen}
+              className={`flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-medium ${
+                earnActive
+                  ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                  : "text-[var(--muted)] hover:bg-[var(--soft)] hover:text-[var(--ink)]"
+              }`}
+              onClick={() => setEarnOpen((v) => !v)}
+              type="button"
+            >
+              Earn
+              <span aria-hidden className="text-[10px]">
+                ▾
+              </span>
+            </button>
+            {earnOpen ? (
+              <div className="absolute left-0 top-full w-64 pt-2">
+                <div className="rounded-2xl border border-[var(--line)] bg-[var(--panel)] p-2 shadow-[var(--shadow)]">
+                  {EARN.map((item) => (
+                    <Link
+                      className="block rounded-xl px-3 py-2 hover:bg-[var(--soft)]"
+                      href={item.href}
+                      key={item.href}
+                      onClick={() => setEarnOpen(false)}
+                    >
+                      <span className="text-sm font-semibold text-[var(--ink)]">
+                        {item.label}
+                      </span>
+                      <span className="block text-xs text-[var(--muted)]">
+                        {item.hint}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           {NAV.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -106,6 +162,20 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
       {open ? (
         <div className="border-t border-[var(--line)] bg-[var(--panel)] px-4 py-4 md:hidden">
           <div className="flex flex-col gap-1">
+            <p className="px-3 pt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+              Earn
+            </p>
+            {EARN.map((item) => (
+              <Link
+                className="rounded-xl px-3 py-3 text-sm font-medium hover:bg-[var(--soft)]"
+                href={item.href}
+                key={item.href}
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <div className="my-1 border-t border-[var(--line)]" />
             {NAV.map((item) => (
               <Link
                 className="rounded-xl px-3 py-3 text-sm font-medium hover:bg-[var(--soft)]"
