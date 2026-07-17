@@ -66,6 +66,17 @@ export function AuthForm({
         type="password"
       />
 
+      {!isRegister ? (
+        <div className="text-right">
+          <Link
+            className="text-xs font-semibold text-[var(--muted)] hover:text-[var(--accent)]"
+            href="/forgot"
+          >
+            Forgot your password?
+          </Link>
+        </div>
+      ) : null}
+
       <button
         className="btn btn-accent w-full"
         disabled={pending}

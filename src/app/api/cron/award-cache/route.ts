@@ -4,7 +4,25 @@ import {
   pruneAwardCacheOlderThan,
   purgeAwardCache,
 } from "@/lib/seats-aero";
-import { isDatabaseConfigured } from "@/lib/db";
+import { isDatabaseConfigured, prisma } from "@/lib/db";
+
+/**
+ * Deletes expired auth tokens and stale rate-limit rows. Reuses this cron
+ * rather than adding a second one — Vercel Hobby caps the number of crons, and
+ * this already runs daily with the same CRON_SECRET protection.
+ */
+async function sweepAuthTables() {
+  const now = new Date();
+  // Rate-limit windows are minutes; a day-old row is long dead.
+  const staleBefore = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const [tokens, limits] = await Promise.all([
+    prisma.authToken.deleteMany({ where: { expiresAt: { lt: now } } }),
+    prisma.rateLimit.deleteMany({ where: { windowStart: { lt: staleBefore } } }),
+  ]);
+
+  return { tokensDeleted: tokens.count, rateLimitsDeleted: limits.count };
+}
 
 /**
  * Daily maintenance for Seats.aero response cache.
@@ -40,6 +58,8 @@ export async function GET(request: NextRequest) {
   const dayKey = awardCacheDayKey();
 
   try {
+    const auth = await sweepAuthTables();
+
     if (mode === "purge") {
       const result = await purgeAwardCache();
       return NextResponse.json({
@@ -48,6 +68,7 @@ export async function GET(request: NextRequest) {
         dayKey: result.dayKey,
         searchesDeleted: result.searchesDeleted,
         tripsDeleted: result.tripsDeleted,
+        ...auth,
       });
     }
 
@@ -58,6 +79,7 @@ export async function GET(request: NextRequest) {
       keptDayKey: dayKey,
       searchesDeleted: result.searchesDeleted,
       tripsDeleted: result.tripsDeleted,
+      ...auth,
     });
   } catch (error) {
     console.error("[cron/award-cache]", error);

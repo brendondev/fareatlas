@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AccountNav } from "@/components/account-nav";
 import { logout } from "@/lib/actions/auth";
 import { isAuthConfigured } from "@/lib/auth-config";
 import { requireUser } from "@/lib/dal";
@@ -30,7 +31,8 @@ export default async function AccountPage() {
 
   return (
     <main className="container-page py-12 sm:py-16">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <AccountNav active="overview" />
+      <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="pill text-[var(--accent)]">
             {tier === "premium" ? "Premium" : "Free plan"}
@@ -79,6 +81,15 @@ export default async function AccountPage() {
               to add one.
             </p>
           )}
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Link className="btn btn-secondary h-9" href="/account/watches">
+              Manage routes
+            </Link>
+            <Link className="btn btn-secondary h-9" href="/account/programs">
+              Your programs
+            </Link>
+          </div>
 
           {/* Honest about the gap: nothing reads this table and sends anything
               yet. Saying "we'll alert you" here would be selling vapour. */}
