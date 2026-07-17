@@ -1,27 +1,68 @@
 @import "tailwindcss";
 
+/*
+ * Obsidian & Champagne.
+ *
+ * Token NAMES are deliberately preserved from the old cream/teal palette:
+ * ~185 references across the app use them by name, so swapping values here
+ * restyles all of them without touching a component. Do not rename these.
+ *
+ * `@theme` exposes the same palette to Tailwind (bg-panel, border-hairline).
+ * New code should use those; the `:root` aliases below keep existing arbitrary
+ * values (bg-[var(--panel)]) working and are retired opportunistically.
+ */
+@theme {
+  --color-base: #0b0d10;
+  --color-panel: #14171c;
+  --color-elevated: #1a1e24;
+  --color-hairline: #23272f;
+  --color-hairline-strong: #2e333d;
+  --color-ink: #f2f0ec;
+  --color-ink-soft: #c9cdd4;
+  --color-muted: #8a9099;
+  --color-accent: #c9a961;
+  --color-accent-strong: #dcc184;
+  --color-danger: #f87171;
+  --color-good: #4ade80;
+  --color-warn: #fbbf24;
+
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
 :root {
-  --background: #f7f4ef;
-  --background-deep: #efe8dc;
-  --panel: #ffffff;
-  --soft: #f3eee6;
-  --line: #e4dcd0;
-  --ink: #172033;
-  --ink-soft: #2a3548;
-  --muted: #667085;
-  --accent: #0f766e;
-  --accent-strong: #0b5f59;
-  --accent-soft: #e6f5f3;
-  --coral: #f97316;
-  --coral-strong: #ea580c;
-  --coral-soft: #fff4eb;
-  --good: #0f766e;
-  --warn: #b45309;
-  --shadow: 0 18px 50px rgba(23, 32, 51, 0.08);
-  --shadow-sm: 0 8px 24px rgba(23, 32, 51, 0.06);
+  /* Tells the UA to render form controls, scrollbars and the native date
+   * picker dark. Without it the date inputs on /flights render as bright
+   * white Chrome widgets on an obsidian page. */
+  color-scheme: dark;
+
+  /* Legacy aliases. Contrast against --panel: ink 15.8:1, ink-soft 11.3:1,
+   * muted 5.6:1, accent 8.1:1 — all clear AA for body text. */
+  --background: var(--color-base);
+  --background-deep: #07080a;
+  --panel: var(--color-panel);
+  --soft: var(--color-elevated);
+  --line: var(--color-hairline);
+  --line-strong: var(--color-hairline-strong);
+  --ink: var(--color-ink);
+  --ink-soft: var(--color-ink-soft);
+  --muted: var(--color-muted);
+  --accent: var(--color-accent);
+  --accent-strong: var(--color-accent-strong);
+  --accent-soft: rgba(201, 169, 97, 0.12);
+  --good: var(--color-good);
+  --warn: var(--color-warn);
+  --danger: var(--color-danger);
+  --danger-soft: rgba(248, 113, 113, 0.12);
+
+  /* On a near-black page, elevation reads through contrast and hairlines more
+   * than shadow — these stay subtle on purpose. */
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.35);
   --radius: 1.25rem;
-  --font-sans: "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
 }
 
 * {
@@ -36,9 +77,18 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(1200px 500px at 10% -10%, #dff5f1 0%, transparent 55%),
-    radial-gradient(900px 400px at 90% 0%, #ffe8d4 0%, transparent 50%),
+    radial-gradient(
+      1100px 460px at 12% -12%,
+      rgba(201, 169, 97, 0.07) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 380px at 88% -6%,
+      rgba(201, 169, 97, 0.035) 0%,
+      transparent 55%
+    ),
     var(--background);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -62,8 +112,19 @@ select {
 }
 
 ::selection {
-  background: #99f6e4;
-  color: #042f2e;
+  background: var(--accent);
+  color: #0b0d10;
+}
+
+/* Points, fares and dates are compared down columns — proportional figures
+ * make adjacent rows impossible to scan. */
+table,
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.font-display {
+  font-family: var(--font-display);
 }
 
 .container-page {
@@ -101,32 +162,28 @@ select {
   transform: translateY(1px);
 }
 
-.btn-primary {
+/* `.btn-primary` and `.btn-accent` are the same button. The alias stays
+ * because both names are in use across the app; new code should say accent. */
+.btn-primary,
+.btn-accent {
   background: var(--accent);
-  color: #fff;
+  color: #0b0d10;
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-accent:hover {
   background: var(--accent-strong);
 }
 
-.btn-coral {
-  background: var(--coral);
-  color: #fff;
-}
-
-.btn-coral:hover {
-  background: var(--coral-strong);
-}
-
 .btn-secondary {
-  background: #fff;
+  background: var(--soft);
   color: var(--ink);
   border-color: var(--line);
 }
 
 .btn-secondary:hover {
-  background: var(--soft);
+  background: #212630;
+  border-color: var(--line-strong);
 }
 
 .btn-ghost {
@@ -135,7 +192,8 @@ select {
 }
 
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
 }
 
 .pill {
@@ -143,6 +201,7 @@ select {
   align-items: center;
   gap: 0.35rem;
   border-radius: 999px;
+  border: 1px solid var(--line);
   padding: 0.3rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -151,10 +210,11 @@ select {
 }
 
 .section-title {
+  font-family: var(--font-display);
   font-size: clamp(1.75rem, 3vw, 2.35rem);
   line-height: 1.15;
-  letter-spacing: -0.03em;
-  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-weight: 600;
 }
 
 .section-lead {
@@ -166,7 +226,12 @@ select {
 }
 
 .gradient-text {
-  background: linear-gradient(120deg, #0f766e 0%, #0ea5e9 45%, #f97316 100%);
+  background: linear-gradient(
+    100deg,
+    #f2e4bf 0%,
+    #c9a961 55%,
+    #a8873f 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -174,8 +239,8 @@ select {
 
 .hero-grid {
   background-image:
-    linear-gradient(rgba(15, 118, 110, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 118, 110, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(201, 169, 97, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 169, 97, 0.045) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
@@ -185,7 +250,7 @@ select {
   gap: 0.5rem;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--panel);
   padding: 0.45rem 0.85rem;
   font-size: 0.85rem;
   font-weight: 600;

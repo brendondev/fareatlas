@@ -3,52 +3,57 @@ import { SITE } from "@/lib/content";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-20 border-t border-[var(--line)] bg-[#171f2f] text-white">
+    // Was a navy slab on a cream page. On obsidian that reads as a *lighter*
+    // block at the bottom, so the footer now recedes to the base colour and is
+    // separated by a hairline instead of by contrast.
+    <footer className="mt-20 border-t border-[var(--line)] bg-[var(--background-deep)] text-[var(--ink)]">
       <div className="container-wide grid gap-10 py-12 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
         <div>
-          <p className="text-lg font-bold">{SITE.name}</p>
-          <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/65">
+          <p className="font-display text-lg font-semibold">{SITE.name}</p>
+          <p className="mt-2 max-w-sm text-sm leading-relaxed text-[var(--muted)]">
             {SITE.description}
           </p>
         </div>
         <div>
-          <p className="text-sm font-semibold text-white/90">Product</p>
-          <div className="mt-3 flex flex-col gap-2 text-sm text-white/65">
-            <Link className="hover:text-white" href="/offers">
+          <p className="text-sm font-semibold text-[var(--ink)]">Product</p>
+          <div className="mt-3 flex flex-col gap-2 text-sm text-[var(--muted)]">
+            <Link className="hover:text-[var(--ink)]" href="/offers">
               Offers
             </Link>
-            <Link className="hover:text-white" href="/flights">
+            <Link className="hover:text-[var(--ink)]" href="/flights">
               Flights
             </Link>
-            <Link className="hover:text-white" href="/pricing">
+            <Link className="hover:text-[var(--ink)]" href="/pricing">
               Pricing
             </Link>
           </div>
         </div>
         <div>
-          <p className="text-sm font-semibold text-white/90">Company</p>
-          <div className="mt-3 flex flex-col gap-2 text-sm text-white/65">
-            <Link className="hover:text-white" href="/contact">
+          <p className="text-sm font-semibold text-[var(--ink)]">Company</p>
+          <div className="mt-3 flex flex-col gap-2 text-sm text-[var(--muted)]">
+            <Link className="hover:text-[var(--ink)]" href="/contact">
               Contact
             </Link>
-            <Link className="hover:text-white" href="/privacy">
+            <Link className="hover:text-[var(--ink)]" href="/privacy">
               Privacy
             </Link>
-            <Link className="hover:text-white" href="/terms">
+            <Link className="hover:text-[var(--ink)]" href="/terms">
               Terms
             </Link>
           </div>
         </div>
         <div>
-          <p className="text-sm font-semibold text-white/90">Australia-first</p>
-          <p className="mt-3 text-sm leading-relaxed text-white/65">
+          <p className="text-sm font-semibold text-[var(--ink)]">
+            Australia-first
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
             Built for Qantas, Velocity, Everyday Rewards and Flybuys — with cash
             fares so you never burn points when dollars are smarter.
           </p>
         </div>
       </div>
-      <div className="border-t border-white/10">
-        <div className="container-wide space-y-3 py-5 text-xs text-white/45">
+      <div className="border-t border-[var(--line)]">
+        <div className="container-wide space-y-3 py-5 text-xs text-[var(--muted)]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p>© {new Date().getFullYear()} {SITE.name}. All rights reserved.</p>
             <p>Award data via Seats.aero · Cash comparison coming via Amadeus</p>

@@ -4,7 +4,7 @@ export function OfferCard({ offer }: { offer: OfferView }) {
   return (
     <article className="card group relative flex h-full flex-col overflow-hidden p-5">
       {offer.featured ? (
-        <span className="absolute right-4 top-4 rounded-full bg-[var(--coral-soft)] px-2.5 py-1 text-[11px] font-bold text-[var(--coral-strong)]">
+        <span className="absolute right-4 top-4 rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[11px] font-bold text-[var(--accent)]">
           🔥 Hot
         </span>
       ) : null}

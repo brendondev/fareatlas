@@ -36,8 +36,8 @@ export function OffersBrowser({
           <button
             className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
               program === "all"
-                ? "bg-[var(--ink)] text-white"
-                : "bg-white text-[var(--muted)] ring-1 ring-[var(--line)] hover:text-[var(--ink)]"
+                ? "bg-[var(--accent)] text-[#0b0d10]"
+                : "bg-[var(--soft)] text-[var(--muted)] ring-1 ring-[var(--line)] hover:text-[var(--ink)]"
             }`}
             onClick={() => setProgram("all")}
             type="button"
@@ -49,7 +49,7 @@ export function OffersBrowser({
               className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
                 program === p.slug
                   ? "text-white"
-                  : "bg-white text-[var(--muted)] ring-1 ring-[var(--line)] hover:text-[var(--ink)]"
+                  : "bg-[var(--soft)] text-[var(--muted)] ring-1 ring-[var(--line)] hover:text-[var(--ink)]"
               }`}
               key={p.slug}
               onClick={() => setProgram(p.slug)}
@@ -63,7 +63,7 @@ export function OffersBrowser({
           ))}
         </div>
         <input
-          className="h-11 w-full rounded-full border border-[var(--line)] bg-white px-4 text-sm shadow-[var(--shadow-sm)] outline-none ring-[var(--accent)] focus:ring-2 sm:max-w-xs"
+          className="h-11 w-full rounded-full border border-[var(--line)] bg-[var(--soft)] px-4 text-sm shadow-[var(--shadow-sm)] outline-none ring-[var(--accent)] focus:ring-2 sm:max-w-xs"
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search offers…"
           value={query}

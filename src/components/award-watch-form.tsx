@@ -103,7 +103,7 @@ export function AwardWatchForm() {
       {message ? (
         <p
           className={`mt-3 text-sm ${
-            status === "error" ? "text-red-600" : "text-[var(--good)]"
+            status === "error" ? "text-[var(--danger)]" : "text-[var(--good)]"
           }`}
         >
           {message}

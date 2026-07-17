@@ -13,9 +13,7 @@ export default function PricingPage() {
   return (
     <main className="container-wide py-10 sm:py-14">
       <div className="mx-auto max-w-2xl text-center">
-        <span className="pill bg-white text-[var(--accent)] ring-1 ring-[var(--line)]">
-          Simple plans
-        </span>
+        <span className="pill text-[var(--accent)]">Simple plans</span>
         <h1 className="section-title mt-4">Start free. Go Premium when you want every seat.</h1>
         <p className="section-lead mx-auto">
           Browse every offer and search Economy awards for nothing, forever.
@@ -50,58 +48,48 @@ function PlanCard({
 }) {
   return (
     <article
-      className={`rounded-[1.5rem] p-6 sm:p-7 ${
-        highlighted
-          ? "bg-[var(--ink)] text-white shadow-[var(--shadow)]"
-          : "card"
+      className={`card relative overflow-hidden p-6 sm:p-7 ${
+        highlighted ? "border-[var(--accent)]/45 shadow-[var(--shadow)]" : ""
       }`}
     >
-      <p
-        className={`text-sm font-semibold ${
-          highlighted ? "text-teal-200" : "text-[var(--accent)]"
-        }`}
-      >
+      {highlighted ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-28"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(201, 169, 97, 0.12), transparent 100%)",
+          }}
+        />
+      ) : null}
+      <p className="relative text-sm font-semibold text-[var(--accent)]">
         {plan.name}
       </p>
-      <p className="mt-2 text-4xl font-bold tracking-tight">{plan.price}</p>
-      <p
-        className={`mt-1 text-sm ${
-          highlighted ? "text-white/65" : "text-[var(--muted)]"
-        }`}
-      >
-        {plan.period}
+      <p className="relative mt-2 font-display text-4xl font-semibold tracking-tight">
+        {plan.price}
       </p>
+      <p className="relative mt-1 text-sm text-[var(--muted)]">{plan.period}</p>
 
-      <p
-        className={`mt-6 text-xs font-bold uppercase tracking-wide ${
-          highlighted ? "text-white/50" : "text-[var(--muted)]"
-        }`}
-      >
+      <p className="relative mt-6 text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
         What you get
       </p>
-      <ul className="mt-3 space-y-2.5 text-sm">
+      <ul className="relative mt-3 space-y-2.5 text-sm">
         {plan.includes.map((item) => (
           <li className="flex gap-2" key={item}>
-            <span className={highlighted ? "text-teal-300" : "text-[var(--good)]"}>
-              ✓
-            </span>
-            <span>{item}</span>
+            <span className="text-[var(--good)]">✓</span>
+            <span className="text-[var(--ink-soft)]">{item}</span>
           </li>
         ))}
       </ul>
 
       {plan.locked.length ? (
         <>
-          <p
-            className={`mt-6 text-xs font-bold uppercase tracking-wide ${
-              highlighted ? "text-white/50" : "text-[var(--muted)]"
-            }`}
-          >
+          <p className="relative mt-6 text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
             Upgrade unlocks
           </p>
-          <ul className="mt-3 space-y-2.5 text-sm opacity-70">
+          <ul className="relative mt-3 space-y-2.5 text-sm">
             {plan.locked.map((item) => (
-              <li className="flex gap-2" key={item}>
+              <li className="flex gap-2 text-[var(--muted)]" key={item}>
                 <span>○</span>
                 <span>{item}</span>
               </li>
@@ -111,7 +99,9 @@ function PlanCard({
       ) : null}
 
       <Link
-        className={`btn mt-8 w-full ${highlighted ? "btn-coral" : "btn-primary"}`}
+        className={`btn relative mt-8 w-full ${
+          highlighted ? "btn-accent" : "btn-secondary"
+        }`}
         href={plan.href}
       >
         {plan.cta}

@@ -17,7 +17,7 @@ export default function ContactPage() {
       <LegalSection heading="Email us">
         <p>
           <a
-            className="btn btn-primary !text-white"
+            className="btn btn-primary"
             href={`mailto:${LEGAL.contactEmail}`}
           >
             {LEGAL.contactEmail}

@@ -169,11 +169,11 @@ export function AwardSearch({ configured }: { configured: boolean }) {
     return (
       <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--soft)] p-5 text-sm text-[var(--muted)]">
         Set{" "}
-        <code className="rounded bg-white px-1.5 py-0.5 text-[var(--ink)]">
+        <code className="rounded bg-[var(--soft)] px-1.5 py-0.5 text-[var(--ink)]">
           AWARD_AVAILABILITY_API_KEY
         </code>{" "}
         in Vercel or{" "}
-        <code className="rounded bg-white px-1.5 py-0.5 text-[var(--ink)]">
+        <code className="rounded bg-[var(--soft)] px-1.5 py-0.5 text-[var(--ink)]">
           .env.local
         </code>{" "}
         to enable live Seats.aero search. Demo award cards still appear above.
@@ -184,7 +184,7 @@ export function AwardSearch({ configured }: { configured: boolean }) {
   return (
     <div className="space-y-4">
       <form
-        className="grid gap-3 rounded-2xl border border-[var(--line)] bg-white p-4 shadow-[var(--shadow-sm)] md:grid-cols-2 xl:grid-cols-6"
+        className="grid gap-3 rounded-2xl border border-[var(--line)] bg-[var(--panel)] p-4 shadow-[var(--shadow-sm)] md:grid-cols-2 xl:grid-cols-6"
         onSubmit={onSearch}
       >
         <label className="flex flex-col gap-1 text-xs font-semibold text-[var(--muted)]">
@@ -246,13 +246,13 @@ export function AwardSearch({ configured }: { configured: boolean }) {
       </form>
 
       {error ? (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100">
+        <p className="rounded-2xl bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)] ring-1 ring-[var(--danger)]/25">
           {error}
         </p>
       ) : null}
 
       {results ? (
-        <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-white shadow-[var(--shadow-sm)]">
+        <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--panel)] shadow-[var(--shadow-sm)]">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] border-collapse text-left text-sm">
               <thead className="bg-[var(--soft)] text-[var(--muted)]">
@@ -317,7 +317,7 @@ export function AwardSearch({ configured }: { configured: boolean }) {
                                 <div className="space-y-3">
                                   {detail.trips.slice(0, 8).map((trip) => (
                                     <div
-                                      className="rounded-xl bg-white p-3 ring-1 ring-[var(--line)]"
+                                      className="rounded-xl bg-[var(--soft)] p-3 ring-1 ring-[var(--line)]"
                                       key={trip.id}
                                     >
                                       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -357,7 +357,7 @@ export function AwardSearch({ configured }: { configured: boolean }) {
                                     <div className="flex flex-wrap gap-2 pt-1">
                                       {detail.bookingLinks.map((link) => (
                                         <a
-                                          className="rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                                          className="rounded-full bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-[#0b0d10] hover:bg-[var(--accent-strong)]"
                                           href={link.link}
                                           key={link.link}
                                           rel="noreferrer"

@@ -14,7 +14,7 @@ export default async function OffersPage() {
   return (
     <main className="container-wide py-10 sm:py-14">
       <div className="max-w-2xl">
-        <span className="pill bg-white text-[var(--accent)] ring-1 ring-[var(--line)]">
+        <span className="pill text-[var(--accent)]">
           Daily earn watch
         </span>
         <h1 className="section-title mt-4">Points opportunities</h1>

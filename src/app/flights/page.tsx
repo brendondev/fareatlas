@@ -24,7 +24,7 @@ export default async function FlightsPage() {
   return (
     <main className="container-wide py-10 sm:py-14">
       <div className="max-w-3xl">
-        <span className="pill bg-white text-[var(--accent)] ring-1 ring-[var(--line)]">
+        <span className="pill text-[var(--accent)]">
           Award seats · cash compare
         </span>
         <h1 className="section-title mt-4">Find reward flights</h1>

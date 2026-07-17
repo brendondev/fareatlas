@@ -29,10 +29,10 @@ export default async function HomePage() {
       <section className="hero-grid relative overflow-hidden border-b border-[var(--line)]">
         <div className="container-wide grid items-center gap-12 py-16 lg:grid-cols-[1.15fr_0.85fr] lg:py-20">
           <div>
-            <span className="pill bg-white text-[var(--accent)] ring-1 ring-[var(--line)]">
+            <span className="pill text-[var(--accent)]">
               Australia-first · Points + cash
             </span>
-            <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.35rem] lg:leading-[1.08]">
+            <h1 className="mt-5 font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-[3.35rem] lg:leading-[1.08]">
               Points and reward flights —{" "}
               <span className="gradient-text">all in one place.</span>
             </h1>
@@ -44,7 +44,7 @@ export default async function HomePage() {
               so you know when dollars beat points.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link className="btn btn-coral" href="/offers">
+              <Link className="btn btn-accent" href="/offers">
                 Start earning smarter
               </Link>
               <Link className="btn btn-secondary" href="/flights">
@@ -62,10 +62,10 @@ export default async function HomePage() {
             <div className="card overflow-hidden p-0 shadow-[var(--shadow)]">
               <div className="flex items-center justify-between border-b border-[var(--line)] bg-[var(--soft)] px-4 py-3">
                 <div className="flex gap-2">
-                  <span className="rounded-full bg-[var(--ink)] px-3 py-1 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-[#0b0d10]">
                     Offers
                   </span>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[var(--muted)] ring-1 ring-[var(--line)]">
+                  <span className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
                     Flights
                   </span>
                 </div>
@@ -74,7 +74,7 @@ export default async function HomePage() {
               <div className="space-y-3 p-4">
                 {offers.slice(0, 3).map((offer) => (
                   <div
-                    className="rounded-xl border border-[var(--line)] bg-white p-3"
+                    className="rounded-xl border border-[var(--line)] bg-[var(--soft)] p-3"
                     key={offer.id}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -85,7 +85,7 @@ export default async function HomePage() {
                         {offer.programName}
                       </span>
                       {offer.featured ? (
-                        <span className="text-[10px] font-bold text-[var(--coral)]">
+                        <span className="text-[10px] font-bold text-[var(--accent)]">
                           ★ Featured
                         </span>
                       ) : null}
@@ -100,9 +100,9 @@ export default async function HomePage() {
                 ))}
               </div>
             </div>
-            <div className="absolute -bottom-5 -left-4 hidden rounded-2xl bg-[var(--ink)] px-4 py-3 text-white shadow-[var(--shadow)] sm:block">
-              <p className="text-xs text-white/70">Cash alternative</p>
-              <p className="text-sm font-semibold">
+            <div className="absolute -bottom-5 -left-4 hidden rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3 shadow-[var(--shadow)] sm:block">
+              <p className="text-xs text-[var(--muted)]">Cash alternative</p>
+              <p className="mt-0.5 text-sm font-semibold tabular">
                 {fares[0]
                   ? `${fares[0].routeLabel} · ${money.format(fares[0].priceAud)}`
                   : "SYD → HND from $914"}
@@ -139,18 +139,28 @@ export default async function HomePage() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {PROGRAMS.map((program) => (
             <article
-              className="card p-5"
+              className="card relative overflow-hidden p-5"
               key={program.slug}
-              style={{ background: `linear-gradient(180deg, ${program.accent}, #fff 48%)` }}
             >
+              {/* Translucent brand wash over the panel — an opaque stop here
+                  would punch a bright hole in the page. */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-32"
+                style={{
+                  background: `linear-gradient(180deg, ${program.accent}, transparent 100%)`,
+                }}
+              />
               <div
-                className="grid size-11 place-items-center rounded-2xl text-sm font-bold text-white"
+                className="relative grid size-11 place-items-center rounded-2xl text-sm font-bold text-white"
                 style={{ background: program.color }}
               >
                 {program.shortCode}
               </div>
-              <h3 className="mt-4 text-lg font-bold">{program.name}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+              <h3 className="relative mt-4 font-display text-lg font-semibold">
+                {program.name}
+              </h3>
+              <p className="relative mt-2 text-sm leading-relaxed text-[var(--muted)]">
                 {program.description}
               </p>
             </article>
@@ -159,7 +169,10 @@ export default async function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="border-y border-[var(--line)] bg-white/70 py-16" id="how-it-works">
+      <section
+        className="border-y border-[var(--line)] bg-[var(--panel)]/60 py-16"
+        id="how-it-works"
+      >
         <div className="container-wide">
           <div className="max-w-2xl">
             <h2 className="section-title">
@@ -211,11 +224,11 @@ export default async function HomePage() {
       <section className="container-wide pb-16">
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="card overflow-hidden p-0">
-            <div className="border-b border-[var(--line)] bg-[var(--ink)] px-5 py-5 text-white">
-              <h2 className="text-2xl font-bold tracking-tight">
+            <div className="border-b border-[var(--line)] bg-[var(--soft)] px-5 py-5">
+              <h2 className="font-display text-2xl font-semibold tracking-tight">
                 Never miss an award seat
               </h2>
-              <p className="mt-2 max-w-lg text-sm text-white/70">
+              <p className="mt-2 max-w-lg text-sm text-[var(--muted)]">
                 Monitor Economy through First. FareAtlas pairs award inventory
                 with cash alternatives so you redeem with intent.
               </p>
@@ -226,7 +239,7 @@ export default async function HomePage() {
                   className="rounded-2xl bg-[var(--soft)] p-4"
                   key={cabin.code}
                 >
-                  <span className="grid size-9 place-items-center rounded-xl bg-white text-sm font-bold text-[var(--accent)] ring-1 ring-[var(--line)]">
+                  <span className="grid size-9 place-items-center rounded-xl border border-[var(--line)] bg-[var(--panel)] font-display text-sm font-bold text-[var(--accent)]">
                     {cabin.code}
                   </span>
                   <h3 className="mt-3 font-bold">{cabin.name}</h3>
@@ -252,7 +265,7 @@ export default async function HomePage() {
                     <span className="text-[var(--muted)]">
                       {row.cabin} · {row.program}
                     </span>
-                    <span className="font-bold text-[var(--accent)]">
+                    <span className="tabular font-bold text-[var(--accent)]">
                       {row.points} pts
                     </span>
                     <span className="text-xs text-[var(--muted)]">{row.ago}</span>
@@ -266,15 +279,13 @@ export default async function HomePage() {
           </div>
 
           <div className="card p-5 sm:p-6">
-            <span className="pill bg-[var(--coral-soft)] text-[var(--coral-strong)]">
-              FareAtlas edge
-            </span>
-            <h2 className="mt-3 text-2xl font-bold tracking-tight">
+            <span className="pill text-[var(--accent)]">FareAtlas edge</span>
+            <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight">
               Buy with $$ when it&apos;s smarter
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-              Points Now style offer + seat tracking — plus cash fare watch so
-              you don&apos;t waste points on a cheap paid ticket.
+              Offer and seat tracking, plus a cash fare watch — so you never
+              burn points on a route where the paid ticket was the better buy.
             </p>
             <div className="mt-5 space-y-3">
               {fares.map((fare) => (
@@ -304,7 +315,7 @@ export default async function HomePage() {
       </section>
 
       {/* Steps */}
-      <section className="border-y border-[var(--line)] bg-white/70 py-16">
+      <section className="border-y border-[var(--line)] bg-[var(--panel)]/60 py-16">
         <div className="container-wide">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="section-title">Start in about three minutes</h2>
@@ -315,7 +326,7 @@ export default async function HomePage() {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {STEPS.map((step) => (
               <article className="card p-5" key={step.n}>
-                <span className="grid size-10 place-items-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">
+                <span className="grid size-10 place-items-center rounded-full bg-[var(--accent)] font-display text-sm font-bold text-[#0b0d10]">
                   {step.n}
                 </span>
                 <h3 className="mt-4 text-lg font-bold">{step.title}</h3>
@@ -345,26 +356,31 @@ export default async function HomePage() {
 
       {/* Final CTA */}
       <section className="container-wide pb-20">
-        <div className="overflow-hidden rounded-[1.75rem] bg-[var(--ink)] px-6 py-12 text-center text-white shadow-[var(--shadow)] sm:px-10">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-[var(--line-strong)] bg-[var(--panel)] px-6 py-12 text-center shadow-[var(--shadow)] sm:px-10">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-48"
+            style={{
+              background:
+                "radial-gradient(620px 180px at 50% 0%, rgba(201, 169, 97, 0.18), transparent 70%)",
+            }}
+          />
+          <h2 className="relative font-display text-3xl font-semibold tracking-tight sm:text-4xl">
             Stop leaving points on the table
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
+          <p className="relative mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[var(--muted)] sm:text-base">
             Join FareAtlas free — track boosts, hunt award seats, and compare
             cash so every trip decision is sharper.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link className="btn btn-coral" href="/offers">
+          <div className="relative mt-8 flex flex-wrap justify-center gap-3">
+            <Link className="btn btn-accent" href="/offers">
               Start free
             </Link>
-            <Link
-              className="btn border border-white/20 bg-white/10 text-white hover:bg-white/15"
-              href="/flights"
-            >
+            <Link className="btn btn-secondary" href="/flights">
               Search flights
             </Link>
           </div>
-          <p className="mt-4 text-xs text-white/50">
+          <p className="relative mt-4 text-xs text-[var(--muted)]">
             Free to start. No credit card. Premium waitlist open.
           </p>
         </div>
@@ -381,47 +397,41 @@ function PricingCard({
   highlighted: boolean;
 }) {
   return (
+    // The highlighted plan used to invert to a dark slab on a light page. That
+    // trick has nowhere to go on obsidian, so emphasis comes from a champagne
+    // hairline and wash instead — and every text colour stays a single token.
     <article
-      className={`rounded-[1.5rem] p-6 ring-1 ${
-        highlighted
-          ? "bg-[var(--ink)] text-white ring-[var(--ink)] shadow-[var(--shadow)]"
-          : "card"
+      className={`card relative overflow-hidden p-6 ${
+        highlighted ? "border-[var(--accent)]/45 shadow-[var(--shadow)]" : ""
       }`}
     >
-      <p
-        className={`text-sm font-semibold ${
-          highlighted ? "text-teal-200" : "text-[var(--accent)]"
-        }`}
-      >
+      {highlighted ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-28"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(201, 169, 97, 0.12), transparent 100%)",
+          }}
+        />
+      ) : null}
+      <p className="relative text-sm font-semibold text-[var(--accent)]">
         {plan.name}
       </p>
-      <p className="mt-2 text-3xl font-bold tracking-tight">{plan.price}</p>
-      <p
-        className={`mt-1 text-sm ${
-          highlighted ? "text-white/65" : "text-[var(--muted)]"
-        }`}
-      >
-        {plan.period}
+      <p className="relative mt-2 font-display text-3xl font-semibold tracking-tight">
+        {plan.price}
       </p>
-      <ul className="mt-6 space-y-2.5 text-sm">
+      <p className="relative mt-1 text-sm text-[var(--muted)]">{plan.period}</p>
+      <ul className="relative mt-6 space-y-2.5 text-sm">
         {plan.includes.map((item) => (
           <li className="flex gap-2" key={item}>
-            <span className={highlighted ? "text-teal-300" : "text-[var(--good)]"}>
-              ✓
-            </span>
-            <span className={highlighted ? "text-white/90" : "text-[var(--ink-soft)]"}>
-              {item}
-            </span>
+            <span className="text-[var(--good)]">✓</span>
+            <span className="text-[var(--ink-soft)]">{item}</span>
           </li>
         ))}
         {"locked" in plan
           ? plan.locked.map((item) => (
-              <li
-                className={`flex gap-2 ${
-                  highlighted ? "text-white/40" : "text-[var(--muted)]"
-                }`}
-                key={item}
-              >
+              <li className="flex gap-2 text-[var(--muted)]" key={item}>
                 <span>○</span>
                 <span>{item}</span>
               </li>
@@ -429,8 +439,8 @@ function PricingCard({
           : null}
       </ul>
       <Link
-        className={`btn mt-8 w-full ${
-          highlighted ? "btn-coral" : "btn-primary"
+        className={`btn relative mt-8 w-full ${
+          highlighted ? "btn-accent" : "btn-secondary"
         }`}
         href={plan.href}
       >

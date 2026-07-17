@@ -16,14 +16,14 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--line)]/80 bg-[rgba(247,244,239,0.85)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(11,13,16,0.72)] backdrop-blur-xl">
       <div className="container-wide flex h-16 items-center justify-between gap-4">
         <Link className="flex items-center gap-2.5" href="/">
-          <span className="grid size-9 place-items-center rounded-xl bg-[var(--accent)] text-sm font-bold text-white shadow-[var(--shadow-sm)]">
+          <span className="grid size-9 place-items-center rounded-xl bg-[var(--accent)] font-display text-sm font-bold text-[#0b0d10]">
             FA
           </span>
           <span>
-            <span className="block text-base font-bold tracking-tight">
+            <span className="block font-display text-base font-semibold tracking-tight">
               {SITE.name}
             </span>
             <span className="hidden text-[11px] font-medium text-[var(--muted)] sm:block">
@@ -40,8 +40,8 @@ export function SiteHeader() {
               <Link
                 className={`rounded-full px-3.5 py-2 text-sm font-medium ${
                   active
-                    ? "bg-[var(--ink)] text-white"
-                    : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"
+                    ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                    : "text-[var(--muted)] hover:bg-[var(--soft)] hover:text-[var(--ink)]"
                 }`}
                 href={item.href}
                 key={item.href}
@@ -56,14 +56,14 @@ export function SiteHeader() {
           <Link className="btn btn-secondary h-10" href="/flights">
             Search seats
           </Link>
-          <Link className="btn btn-coral h-10" href="/offers">
+          <Link className="btn btn-accent h-10" href="/offers">
             Browse offers
           </Link>
         </div>
 
         <button
           aria-label="Menu"
-          className="grid size-10 place-items-center rounded-xl border border-[var(--line)] bg-white md:hidden"
+          className="grid size-10 place-items-center rounded-xl border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)] md:hidden"
           onClick={() => setOpen((v) => !v)}
           type="button"
         >
@@ -72,7 +72,7 @@ export function SiteHeader() {
       </div>
 
       {open ? (
-        <div className="border-t border-[var(--line)] bg-white px-4 py-4 md:hidden">
+        <div className="border-t border-[var(--line)] bg-[var(--panel)] px-4 py-4 md:hidden">
           <div className="flex flex-col gap-1">
             {NAV.map((item) => (
               <Link
@@ -85,7 +85,7 @@ export function SiteHeader() {
               </Link>
             ))}
             <Link
-              className="btn btn-coral mt-2"
+              className="btn btn-accent mt-2"
               href="/flights"
               onClick={() => setOpen(false)}
             >
