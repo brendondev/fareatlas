@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  getTrips,
+  getTripsCached,
   isSeatsAeroConfigured,
   programLabel,
   SeatsAeroError,
 } from "@/lib/seats-aero";
+import { isDatabaseConfigured } from "@/lib/db";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -32,9 +33,32 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   const includeFiltered =
     request.nextUrl.searchParams.get("include_filtered") === "true";
+  const bypassCache =
+    request.nextUrl.searchParams.get("refresh") === "1" ||
+    request.nextUrl.searchParams.get("refresh") === "true";
 
   try {
-    const response = await getTrips(id, { includeFiltered });
+    let source: "cache" | "api" = "api";
+    let dayKey: string | null = null;
+    let cacheHits = 0;
+    let response;
+
+    if (bypassCache) {
+      const { getTrips } = await import("@/lib/seats-aero/client");
+      const { setCachedTrips, awardCacheDayKey } = await import(
+        "@/lib/seats-aero/cache"
+      );
+      response = await getTrips(id, { includeFiltered });
+      await setCachedTrips(id, includeFiltered, response);
+      dayKey = awardCacheDayKey();
+    } else {
+      const cached = await getTripsCached(id, { includeFiltered });
+      response = cached.response;
+      source = cached.source;
+      dayKey = cached.dayKey;
+      cacheHits = cached.hitCount;
+    }
+
     const trips = (response.data ?? []).map((trip) => ({
       id: trip.ID,
       cabin: trip.Cabin ?? null,
@@ -67,6 +91,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({
       configured: true,
       availabilityId: id,
+      cache: {
+        enabled: isDatabaseConfigured(),
+        source,
+        dayKey,
+        hitCount: cacheHits,
+        bypassed: bypassCache,
+      },
       count: trips.length,
       trips,
       bookingLinks: response.booking_links ?? [],

@@ -88,3 +88,41 @@ model AppSetting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+/// Daily Seats.aero search cache (saves Partner API quota).
+/// Rows for previous days are wiped by /api/cron/award-cache.
+model AwardSearchCache {
+  id           String   @id @default(cuid())
+  /// Hash of dayKey + normalized search params (unique per day).
+  queryKey     String   @unique
+  dayKey       String
+  origin       String
+  destination  String
+  startDate    String?
+  endDate      String?
+  paramsJson   String
+  /// Full Seats.aero /search JSON response.
+  responseJson String
+  hitCount     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([dayKey])
+  @@index([origin, destination, dayKey])
+}
+
+/// Daily Seats.aero trip-detail cache for Availability IDs.
+model AwardTripCache {
+  id             String   @id @default(cuid())
+  queryKey       String   @unique
+  dayKey         String
+  availabilityId String
+  includeFiltered Boolean @default(false)
+  responseJson   String
+  hitCount       Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([dayKey])
+  @@index([availabilityId, dayKey])
+}

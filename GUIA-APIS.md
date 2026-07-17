@@ -69,6 +69,19 @@ Header usado: `Partner-Authorization` (token OAuth `seats:…` recebe prefixo `B
 
 Na Vercel: Settings → Environment Variables → `AWARD_AVAILABILITY_API_KEY` (Production + Preview).
 
+### Cache diario no Neon (quota Seats.aero)
+
+Para nao gastar as ~1000 chamadas/dia do Partner API em buscas repetidas:
+
+| Fluxo | Comportamento |
+| --- | --- |
+| 1a busca do dia (rota+filtros) | Chama Seats.aero e grava em `AwardSearchCache` / `AwardTripCache` |
+| Mesma busca no mesmo dia (Sydney) | Le do Neon — **0** chamada a Seats.aero |
+| Cron 14:05 UTC | `GET /api/cron/award-cache?mode=purge` limpa as tabelas |
+| Debug | `?refresh=1` forca API e regrava o cache |
+
+Tambem ha prune lazy ao gravar (remove `dayKey` antigo). Configure `CRON_SECRET` na Vercel.
+
 ## 2. Tarifas em dinheiro - Amadeus
 
 ### Onde acessar

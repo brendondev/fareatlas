@@ -22,6 +22,19 @@ Inspired by products like Points Now, with a warmer product UI and an explicit c
 - `/flights` — Seats.aero search, trip detail, cash watch, route alert capture
 - `/pricing` — Free vs Premium (Stripe waitlist next)
 - API: `/api/awards/*`, `/api/offers`, `/api/watches`
+- **Daily Seats.aero cache** in Neon — identical searches reuse DB rows; table purged nightly (Sydney day)
+
+### Award cache (save Seats.aero quota)
+
+| Behaviour | Detail |
+| --- | --- |
+| Key | Hash of route + dates + filters + Sydney `dayKey` |
+| Hit | Serve JSON from `AwardSearchCache` / `AwardTripCache` (no API call) |
+| Miss | Call Seats.aero, store payload for the rest of the day |
+| Cleanup | Vercel Cron `GET /api/cron/award-cache?mode=purge` at 14:05 UTC (~00:05 AEST) |
+| Bypass | `?refresh=1` forces a live API call and rewrites the cache |
+
+Requires `DATABASE_URL` + `CRON_SECRET` (recommended) on Vercel.
 
 ## Local setup
 

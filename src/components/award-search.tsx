@@ -13,6 +13,12 @@ type SearchResponse = {
   results: AwardResult[];
   count: number;
   error?: string;
+  cache?: {
+    enabled?: boolean;
+    source?: "cache" | "api";
+    dayKey?: string | null;
+    hitCount?: number;
+  };
 };
 
 function isoDate(daysAhead: number): string {
@@ -45,6 +51,7 @@ export function AwardSearch({ configured }: { configured: boolean }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<AwardResult[] | null>(null);
+  const [cacheLabel, setCacheLabel] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [tripsLoading, setTripsLoading] = useState(false);
   const [tripsById, setTripsById] = useState<
@@ -92,13 +99,30 @@ export function AwardSearch({ configured }: { configured: boolean }) {
 
         if (!res.ok) {
           setResults(null);
+          setCacheLabel(null);
           setError(data.error ?? data.detail ?? "Search failed.");
           return;
         }
 
         setResults(data.results ?? []);
+        if (data.cache?.source === "cache") {
+          setCacheLabel(
+            `served from Neon cache${
+              data.cache.hitCount ? ` (hit #${data.cache.hitCount})` : ""
+            }`,
+          );
+        } else if (data.cache?.source === "api") {
+          setCacheLabel(
+            data.cache.enabled
+              ? "fresh from Seats.aero · saved to cache"
+              : "from Seats.aero (DB cache offline)",
+          );
+        } else {
+          setCacheLabel(null);
+        }
       } catch {
         setResults(null);
+        setCacheLabel(null);
         setError("Network error while searching awards.");
       } finally {
         setLoading(false);
@@ -362,8 +386,10 @@ export function AwardSearch({ configured }: { configured: boolean }) {
           </div>
           {results.length > 0 ? (
             <p className="border-t border-[var(--line)] px-4 py-3 text-xs text-[var(--muted)]">
-              Showing {results.length} rows via Seats.aero. FareAtlas does not
-              ticket awards — book on the airline program.
+              Showing {results.length} rows
+              {cacheLabel ? ` · ${cacheLabel}` : ""}. FareAtlas does not ticket
+              awards — book on the airline program. Duplicate searches today
+              are served from Neon cache to save Seats.aero quota.
             </p>
           ) : null}
         </div>

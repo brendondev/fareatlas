@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   AU_FOCUS_SOURCES,
-  cachedSearch,
   isSeatsAeroConfigured,
   mapSearchResults,
+  searchAwardsCached,
   SeatsAeroError,
 } from "@/lib/seats-aero";
+import { isDatabaseConfigured } from "@/lib/db";
 
 const IATA = /^[A-Za-z]{3}(,[A-Za-z]{3})*$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -98,27 +99,59 @@ export async function GET(request: NextRequest) {
   const includeTrips =
     sp.get("include_trips") === "true" || sp.get("includeTrips") === "true";
 
+  // Allow forced refresh for ops/debug: ?refresh=1 bypasses cache.
+  const bypassCache = sp.get("refresh") === "1" || sp.get("refresh") === "true";
+
+  const searchParams = {
+    originAirport: origin,
+    destinationAirport: destination,
+    startDate,
+    endDate,
+    sources: sources || undefined,
+    cabins,
+    carriers,
+    onlyDirectFlights: onlyDirect || undefined,
+    includeTrips: includeTrips || undefined,
+    orderBy,
+    take,
+    skip,
+    cursor,
+  };
+
   try {
-    const response = await cachedSearch({
-      originAirport: origin,
-      destinationAirport: destination,
-      startDate,
-      endDate,
-      sources: sources || undefined,
-      cabins,
-      carriers,
-      onlyDirectFlights: onlyDirect || undefined,
-      includeTrips: includeTrips || undefined,
-      orderBy,
-      take,
-      skip,
-      cursor,
-    });
+    let source: "cache" | "api" = "api";
+    let dayKey: string | null = null;
+    let cacheHits = 0;
+    let response;
+
+    if (bypassCache) {
+      const { cachedSearch } = await import("@/lib/seats-aero/client");
+      const { setCachedSearch, awardCacheDayKey } = await import(
+        "@/lib/seats-aero/cache"
+      );
+      response = await cachedSearch(searchParams);
+      await setCachedSearch(searchParams, response);
+      dayKey = awardCacheDayKey();
+      source = "api";
+    } else {
+      const cached = await searchAwardsCached(searchParams);
+      response = cached.response;
+      source = cached.source;
+      dayKey = cached.dayKey;
+      cacheHits = cached.hitCount;
+    }
 
     const results = mapSearchResults(response.data ?? []);
 
     return NextResponse.json({
       configured: true,
+      cache: {
+        enabled: isDatabaseConfigured(),
+        source,
+        dayKey,
+        hitCount: cacheHits,
+        bypassed: bypassCache,
+      },
       query: {
         origin: origin.toUpperCase(),
         destination: destination.toUpperCase(),

@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/award-cache?mode=purge",
+      "schedule": "5 14 * * *"
+    }
+  ]
+}
