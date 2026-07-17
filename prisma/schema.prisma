@@ -1,0 +1,90 @@
+// FareAtlas — Neon PostgreSQL (Vercel Marketplace / Neon)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model LoyaltyProgram {
+  id          String   @id @default(cuid())
+  slug        String   @unique // qantas | velocity | everyday | flybuys
+  name        String
+  shortCode   String
+  description String
+  color       String   @default("#0f766e")
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  offers Offer[]
+}
+
+model Offer {
+  id          String    @id @default(cuid())
+  programId   String
+  program     LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  summary     String
+  category    String    // groceries | travel | shopping | marketplace | cards | wine | other
+  estimate    String?
+  url         String?
+  featured    Boolean   @default(false)
+  status      String    @default("published") // draft | published | archived
+  expiresAt   DateTime?
+  publishedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([programId, status])
+  @@index([category])
+}
+
+/// Saved award watch (email capture until full auth).
+model AwardWatch {
+  id          String   @id @default(cuid())
+  email       String
+  origin      String
+  destination String
+  cabins      String   @default("economy,business") // comma-separated
+  programs    String?  // optional seats.aero sources
+  startDate   DateTime?
+  endDate     DateTime?
+  status      String   @default("active") // active | paused | unsubscribed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([email, status])
+  @@index([origin, destination])
+}
+
+/// Cached cash fare snapshots (Amadeus later; seed for demo).
+model CashFare {
+  id            String   @id @default(cuid())
+  origin        String
+  destination   String
+  routeLabel    String
+  airline       String
+  travelWindow  String
+  priceAud      Float
+  note          String?
+  active        Boolean  @default(true)
+  capturedAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([origin, destination, active])
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}

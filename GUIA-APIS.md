@@ -8,12 +8,12 @@ Use a numeracao das etapas para tirar duvidas por partes, por exemplo: `vamos fa
 
 - [x] 1. Seats.aero - voos com pontos
 - [ ] 2. Amadeus - tarifas em dinheiro
-- [ ] 3. Neon - banco de dados
+- [x] 3. Neon - banco de dados (schema + seed + fallbacks)
 - [ ] 4. Clerk - login de usuarios
 - [ ] 5. Resend - alertas por e-mail
 - [ ] 6. Stripe - assinaturas
 - [ ] 7. Twilio - alertas por SMS, opcional
-- [ ] 8. Ofertas de fidelidade - cadastro editorial
+- [x] 8. Ofertas de fidelidade - seed editorial (admin UI next)
 - [ ] 9. Vercel - publicacao e tarefas agendadas
 
 ## 1. Voos com pontos - Seats.aero
@@ -124,11 +124,27 @@ O placeholder atual `CASH_FARES_API_KEY` sera substituido por essas duas variave
 5. Ativar `Connection pooling`.
 6. Copiar a connection string com `-pooler` no hostname.
 
-### Variavel de ambiente
+### Variaveis de ambiente
 
 ```env
 DATABASE_URL="postgresql://...-pooler.../fareatlas?sslmode=require"
+DIRECT_URL="postgresql://.../fareatlas?sslmode=require"
 ```
+
+### Integracao no codigo (etapa 3 concluida no MVP)
+
+| Peca | Caminho |
+| --- | --- |
+| Schema | `prisma/schema.prisma` |
+| Seed | `prisma/seed.ts` |
+| Client | `src/lib/db.ts` |
+| Offers / cash | `src/lib/offers.ts` |
+| Watches API | `POST /api/watches` |
+| Bootstrap deploy | `scripts/db-setup.mjs` |
+
+Modelos: `LoyaltyProgram`, `Offer`, `AwardWatch`, `CashFare`, `AppSetting`.
+
+Sem `DATABASE_URL` o app sobe com catalogo demo (fallback).
 
 ## 4. Login de usuarios - Clerk
 

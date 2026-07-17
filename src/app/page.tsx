@@ -1,285 +1,516 @@
-import { AwardSearch } from "@/components/award-search";
-import { getDashboardData } from "@/lib/api";
-import { isSeatsAeroConfigured } from "@/lib/seats-aero";
+import Link from "next/link";
+import { OfferCard } from "@/components/offer-card";
+import {
+  CABINS,
+  FEATURES,
+  PRICING,
+  RECENT_AWARDS,
+  SITE,
+  STEPS,
+} from "@/lib/content";
+import { getCashFares, getOffers } from "@/lib/offers";
+import { PROGRAMS } from "@/lib/programs";
 
-const formatter = new Intl.NumberFormat("en-AU", {
+const money = new Intl.NumberFormat("en-AU", {
   style: "currency",
   currency: "AUD",
   maximumFractionDigits: 0,
 });
 
-export default async function Home() {
-  const {
-    awardSignals,
-    cashFares,
-    pointsOffers,
-    integrationGaps,
-    awardsLive,
-    awardsError,
-  } = await getDashboardData();
-  const seatsConfigured = isSeatsAeroConfigured();
+export default async function HomePage() {
+  const [{ offers }, { fares }] = await Promise.all([
+    getOffers({ take: 4 }),
+    getCashFares(3),
+  ]);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--ink)]">
-      <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-4 sm:px-6 lg:px-8">
-        <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] w-56 shrink-0 rounded-2xl bg-[var(--panel)] p-5 ring-1 ring-[var(--line)] lg:flex lg:flex-col">
+    <main>
+      {/* Hero */}
+      <section className="hero-grid relative overflow-hidden border-b border-[var(--line)]">
+        <div className="container-wide grid items-center gap-12 py-16 lg:grid-cols-[1.15fr_0.85fr] lg:py-20">
           <div>
-            <p className="text-xl font-semibold tracking-tight">FareAtlas</p>
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              Points and fares for Australian travellers.
+            <span className="pill bg-white text-[var(--accent)] ring-1 ring-[var(--line)]">
+              Australia-first · Points + cash
+            </span>
+            <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.35rem] lg:leading-[1.08]">
+              Points and reward flights —{" "}
+              <span className="gradient-text">all in one place.</span>
+            </h1>
+            <p className="section-lead mt-5">
+              {SITE.description} Unlike points-only apps, FareAtlas also tracks{" "}
+              <strong className="font-semibold text-[var(--ink)]">
+                cash fares
+              </strong>{" "}
+              so you know when dollars beat points.
             </p>
-          </div>
-
-          <nav className="mt-8 flex flex-col gap-1 text-sm">
-            {["Watchlist", "Award seats", "Cash fares", "Offers", "Alerts"].map(
-              (item, index) => (
-                <a
-                  className={`rounded-xl px-3 py-2 ${
-                    index === 0
-                      ? "bg-[var(--ink)] text-white"
-                      : "text-[var(--muted)] hover:bg-[var(--soft)] hover:text-[var(--ink)]"
-                  }`}
-                  href={`#${item.toLowerCase().replaceAll(" ", "-")}`}
-                  key={item}
-                >
-                  {item}
-                </a>
-              ),
-            )}
-          </nav>
-
-          <div className="mt-auto rounded-xl bg-[var(--soft)] p-4 text-sm">
-            <p className="font-medium">API mode</p>
-            <p className="mt-1 text-[var(--muted)]">
-              {seatsConfigured
-                ? awardsLive
-                  ? "Seats.aero live. Cash fares still mocked."
-                  : "Seats.aero key set; feed may be partial."
-                : "Mock awards. Add AWARD_AVAILABILITY_API_KEY for live seats."}
-            </p>
-          </div>
-        </aside>
-
-        <section className="min-w-0 flex-1">
-          <header className="flex flex-col gap-3 rounded-2xl bg-[var(--panel)] p-5 ring-1 ring-[var(--line)] sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-medium text-[var(--accent)]">
-                Australia first travel intelligence
-              </p>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Decide when to use points and when to pay cash.
-              </h1>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link className="btn btn-coral" href="/offers">
+                Start earning smarter
+              </Link>
+              <Link className="btn btn-secondary" href="/flights">
+                Search award seats
+              </Link>
             </div>
-            <a
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--accent)] px-4 text-sm font-semibold text-white hover:bg-[var(--accent-strong)]"
-              href="#award-seats"
-            >
-              Search award seats
-            </a>
-          </header>
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--muted)]">
+              <span>✓ Free to start</span>
+              <span>✓ Cancel anytime</span>
+              <span>✓ 4 AU programs, one app</span>
+            </div>
+          </div>
 
-          <section
-            className="mt-6 grid gap-4 md:grid-cols-3"
-            id="watchlist"
-          >
-            {[
-              ["Routes watched", "4 sample", "SYD, MEL, BNE dashboard probes"],
-              [
-                "Award feed",
-                seatsConfigured ? (awardsLive ? "Live" : "Partial") : "Mock",
-                seatsConfigured
-                  ? "Seats.aero Partner API"
-                  : "Connect AWARD_AVAILABILITY_API_KEY",
-              ],
-              ["Cash alerts", "9", "Amadeus / cash API still pending"],
-            ].map(([label, value, note]) => (
-              <div
-                className="rounded-2xl bg-[var(--panel)] p-5 ring-1 ring-[var(--line)]"
-                key={label}
-              >
-                <p className="text-sm text-[var(--muted)]">{label}</p>
-                <p className="mt-3 text-3xl font-semibold">{value}</p>
-                <p className="mt-2 text-sm text-[var(--muted)]">{note}</p>
-              </div>
-            ))}
-          </section>
-
-          <section className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-            <div
-              className="rounded-2xl bg-[var(--panel)] p-5 ring-1 ring-[var(--line)]"
-              id="award-seats"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold">Award seat signals</h2>
-                  <p className="text-sm text-[var(--muted)]">
-                    Live Seats.aero search for AU-focused programs.
-                  </p>
+          <div className="relative">
+            <div className="card overflow-hidden p-0 shadow-[var(--shadow)]">
+              <div className="flex items-center justify-between border-b border-[var(--line)] bg-[var(--soft)] px-4 py-3">
+                <div className="flex gap-2">
+                  <span className="rounded-full bg-[var(--ink)] px-3 py-1 text-xs font-semibold text-white">
+                    Offers
+                  </span>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[var(--muted)] ring-1 ring-[var(--line)]">
+                    Flights
+                  </span>
                 </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    seatsConfigured
-                      ? "bg-emerald-50 text-[var(--good)]"
-                      : "bg-[var(--soft)] text-[var(--muted)]"
-                  }`}
-                >
-                  {seatsConfigured ? "Seats.aero" : "API pending"}
-                </span>
+                <span className="text-xs text-[var(--muted)]">Live preview</span>
               </div>
-
-              {awardsError ? (
-                <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-100">
-                  {awardsError}
-                </p>
-              ) : null}
-
-              <div className="mt-5 overflow-hidden rounded-xl ring-1 ring-[var(--line)]">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead className="bg-[var(--soft)] text-[var(--muted)]">
-                    <tr>
-                      <th className="px-4 py-3 font-medium">Route</th>
-                      <th className="px-4 py-3 font-medium">Cabin</th>
-                      <th className="px-4 py-3 font-medium">Points</th>
-                      <th className="px-4 py-3 font-medium">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {awardSignals.map((signal) => (
-                      <tr
-                        className="border-t border-[var(--line)]"
-                        key={`${signal.from}-${signal.to}-${signal.cabin}-${signal.program}-${signal.points}`}
-                      >
-                        <td className="px-4 py-4">
-                          <p className="font-medium">
-                            {signal.from} to {signal.to}
-                          </p>
-                          <p className="text-xs text-[var(--muted)]">
-                            {signal.program} · {signal.seats} seats
-                          </p>
-                        </td>
-                        <td className="px-4 py-4">{signal.cabin}</td>
-                        <td className="px-4 py-4">{signal.points}</td>
-                        <td className="px-4 py-4 font-semibold text-[var(--good)]">
-                          {signal.valueCentsPerPoint === "—"
-                            ? "cpp pending"
-                            : `${signal.valueCentsPerPoint} cpp`}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-6 border-t border-[var(--line)] pt-5">
-                <h3 className="text-lg font-semibold">Live award search</h3>
-                <p className="text-sm text-[var(--muted)]">
-                  Origin / destination IATA · date window · open flight detail +
-                  booking links.
-                </p>
-                <AwardSearch configured={seatsConfigured} />
-              </div>
-            </div>
-
-            <div
-              className="rounded-2xl bg-[var(--panel)] p-5 ring-1 ring-[var(--line)]"
-              id="cash-fares"
-            >
-              <h2 className="text-xl font-semibold">Cash fare watch</h2>
-              <p className="text-sm text-[var(--muted)]">
-                Intended for paid flight price APIs and affiliate links.
-              </p>
-
-              <div className="mt-5 space-y-3">
-                {cashFares.map((fare) => (
+              <div className="space-y-3 p-4">
+                {offers.slice(0, 3).map((offer) => (
                   <div
-                    className="rounded-xl bg-[var(--soft)] p-4"
-                    key={`${fare.route}-${fare.airline}`}
+                    className="rounded-xl border border-[var(--line)] bg-white p-3"
+                    key={offer.id}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="font-medium">{fare.route}</p>
-                        <p className="text-sm text-[var(--muted)]">
-                          {fare.airline} · {fare.travelWindow}
-                        </p>
-                      </div>
-                      <p className="text-lg font-semibold">
-                        {formatter.format(fare.price)}
-                      </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+                        style={{ background: offer.programColor }}
+                      >
+                        {offer.programName}
+                      </span>
+                      {offer.featured ? (
+                        <span className="text-[10px] font-bold text-[var(--coral)]">
+                          ★ Featured
+                        </span>
+                      ) : null}
                     </div>
-                    <p className="mt-3 text-sm text-[var(--good)]">
-                      {fare.delta}
+                    <p className="mt-2 text-sm font-semibold leading-snug">
+                      {offer.title}
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--muted)]">
+                      {offer.category} · {offer.expiresLabel}
                     </p>
                   </div>
                 ))}
               </div>
             </div>
-          </section>
+            <div className="absolute -bottom-5 -left-4 hidden rounded-2xl bg-[var(--ink)] px-4 py-3 text-white shadow-[var(--shadow)] sm:block">
+              <p className="text-xs text-white/70">Cash alternative</p>
+              <p className="text-sm font-semibold">
+                {fares[0]
+                  ? `${fares[0].routeLabel} · ${money.format(fares[0].priceAud)}`
+                  : "SYD → HND from $914"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <section
-            className="mt-6 rounded-2xl bg-[var(--panel)] p-5 ring-1 ring-[var(--line)]"
-            id="offers"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">Points earning offers</h2>
-                <p className="text-sm text-[var(--muted)]">
-                  Mocked source for Qantas, Velocity, Everyday Rewards and Flybuys.
-                </p>
+      {/* Programs */}
+      <section className="container-wide py-14">
+        <p className="text-center text-sm font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+          Australia&apos;s core loyalty programs
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          {PROGRAMS.map((program) => (
+            <span className="program-chip" key={program.slug}>
+              <span className="dot" style={{ background: program.color }} />
+              {program.name}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* Program panels */}
+      <section className="container-wide pb-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="section-title">All your programs, one dashboard</h2>
+          <p className="section-lead mx-auto">
+            Stop checking four sites. Follow the programs you use and act when
+            value appears — earn boosts or award seats.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {PROGRAMS.map((program) => (
+            <article
+              className="card p-5"
+              key={program.slug}
+              style={{ background: `linear-gradient(180deg, ${program.accent}, #fff 48%)` }}
+            >
+              <div
+                className="grid size-11 place-items-center rounded-2xl text-sm font-bold text-white"
+                style={{ background: program.color }}
+              >
+                {program.shortCode}
               </div>
-              <button className="h-10 rounded-xl border border-[var(--line)] px-4 text-sm font-medium hover:bg-[var(--soft)]">
-                Add offer source
-              </button>
-            </div>
+              <h3 className="mt-4 text-lg font-bold">{program.name}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+                {program.description}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              {pointsOffers.map((offer) => (
-                <article
-                  className="rounded-xl bg-[var(--soft)] p-4"
-                  key={offer.title}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-medium ring-1 ring-[var(--line)]">
-                      {offer.program}
-                    </span>
-                    <span className="text-xs text-[var(--muted)]">
-                      {offer.expires}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold">{offer.title}</h3>
-                  <p className="mt-2 text-sm text-[var(--muted)]">
-                    {offer.summary}
-                  </p>
-                  <p className="mt-4 text-sm font-semibold text-[var(--accent)]">
-                    {offer.estimate}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section
-            className="mt-6 rounded-2xl bg-[var(--ink)] p-5 text-white"
-            id="api-gaps"
-          >
-            <h2 className="text-xl font-semibold">API work left open</h2>
-            <p className="mt-1 text-sm text-white/70">
-              Stage progress from GUIA-APIS.md. Award search is wired; remaining
-              adapters still use placeholders.
+      {/* Features */}
+      <section className="border-y border-[var(--line)] bg-white/70 py-16" id="how-it-works">
+        <div className="container-wide">
+          <div className="max-w-2xl">
+            <h2 className="section-title">
+              Everything you need to maximise points and flights
+            </h2>
+            <p className="section-lead">
+              One membership path for offers, award alerts tuned to your travel
+              windows, and cash comparisons when points are not the win.
             </p>
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {integrationGaps.map((gap) => (
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {FEATURES.map((feature) => (
+              <article className="card p-5" key={feature.title}>
+                <div className="grid size-10 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+                  <FeatureIcon name={feature.icon} />
+                </div>
+                <h3 className="mt-4 text-lg font-bold">{feature.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+                  {feature.body}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Offers strip */}
+      <section className="container-wide py-16">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="section-title">Today&apos;s points opportunities</h2>
+            <p className="section-lead">
+              Fresh earn boosts across Qantas, Velocity, Everyday Rewards and
+              Flybuys.
+            </p>
+          </div>
+          <Link className="btn btn-secondary" href="/offers">
+            View all offers
+          </Link>
+        </div>
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {offers.map((offer) => (
+            <OfferCard key={offer.id} offer={offer} />
+          ))}
+        </div>
+      </section>
+
+      {/* Award + cash */}
+      <section className="container-wide pb-16">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="card overflow-hidden p-0">
+            <div className="border-b border-[var(--line)] bg-[var(--ink)] px-5 py-5 text-white">
+              <h2 className="text-2xl font-bold tracking-tight">
+                Never miss an award seat
+              </h2>
+              <p className="mt-2 max-w-lg text-sm text-white/70">
+                Monitor Economy through First. FareAtlas pairs award inventory
+                with cash alternatives so you redeem with intent.
+              </p>
+            </div>
+            <div className="grid gap-3 p-5 sm:grid-cols-3">
+              {CABINS.slice(0, 3).map((cabin) => (
                 <div
-                  className="rounded-xl bg-white/8 p-4 ring-1 ring-white/10"
-                  key={gap.name}
+                  className="rounded-2xl bg-[var(--soft)] p-4"
+                  key={cabin.code}
                 >
-                  <p className="font-medium">{gap.name}</p>
-                  <p className="mt-1 text-sm text-white/70">{gap.nextStep}</p>
+                  <span className="grid size-9 place-items-center rounded-xl bg-white text-sm font-bold text-[var(--accent)] ring-1 ring-[var(--line)]">
+                    {cabin.code}
+                  </span>
+                  <h3 className="mt-3 font-bold">{cabin.name}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                    {cabin.body}
+                  </p>
                 </div>
               ))}
             </div>
-          </section>
-        </section>
-      </div>
+            <div className="border-t border-[var(--line)] px-5 py-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+                Recent award signals
+              </p>
+              <div className="mt-3 space-y-2">
+                {RECENT_AWARDS.map((row) => (
+                  <div
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[var(--soft)] px-3 py-2.5 text-sm"
+                    key={`${row.from}-${row.to}-${row.cabin}`}
+                  >
+                    <span className="font-semibold">
+                      {row.from} ✈ {row.to}
+                    </span>
+                    <span className="text-[var(--muted)]">
+                      {row.cabin} · {row.program}
+                    </span>
+                    <span className="font-bold text-[var(--accent)]">
+                      {row.points} pts
+                    </span>
+                    <span className="text-xs text-[var(--muted)]">{row.ago}</span>
+                  </div>
+                ))}
+              </div>
+              <Link className="btn btn-primary mt-4" href="/flights">
+                Open award search
+              </Link>
+            </div>
+          </div>
+
+          <div className="card p-5 sm:p-6">
+            <span className="pill bg-[var(--coral-soft)] text-[var(--coral-strong)]">
+              FareAtlas edge
+            </span>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight">
+              Buy with $$ when it&apos;s smarter
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+              Points Now style offer + seat tracking — plus cash fare watch so
+              you don&apos;t waste points on a cheap paid ticket.
+            </p>
+            <div className="mt-5 space-y-3">
+              {fares.map((fare) => (
+                <div
+                  className="rounded-2xl border border-[var(--line)] bg-[var(--soft)] p-4"
+                  key={fare.id}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{fare.routeLabel}</p>
+                      <p className="text-sm text-[var(--muted)]">
+                        {fare.airline} · {fare.travelWindow}
+                      </p>
+                    </div>
+                    <p className="text-lg font-bold">
+                      {money.format(fare.priceAud)}
+                    </p>
+                  </div>
+                  {fare.note ? (
+                    <p className="mt-2 text-sm text-[var(--good)]">{fare.note}</p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Steps */}
+      <section className="border-y border-[var(--line)] bg-white/70 py-16">
+        <div className="container-wide">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="section-title">Start in about three minutes</h2>
+            <p className="section-lead mx-auto">
+              Set up once. Let FareAtlas watch offers and seats for you.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {STEPS.map((step) => (
+              <article className="card p-5" key={step.n}>
+                <span className="grid size-10 place-items-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">
+                  {step.n}
+                </span>
+                <h3 className="mt-4 text-lg font-bold">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+                  {step.body}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing teaser */}
+      <section className="container-wide py-16" id="pricing">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="section-title">Start free. Go Premium when ready.</h2>
+          <p className="section-lead mx-auto">
+            Browse offers free forever. Upgrade later for every cabin, longer
+            award windows and unlimited alerts.
+          </p>
+        </div>
+        <div className="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2">
+          <PricingCard plan={PRICING.free} highlighted={false} />
+          <PricingCard plan={PRICING.premium} highlighted />
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="container-wide pb-20">
+        <div className="overflow-hidden rounded-[1.75rem] bg-[var(--ink)] px-6 py-12 text-center text-white shadow-[var(--shadow)] sm:px-10">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Stop leaving points on the table
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
+            Join FareAtlas free — track boosts, hunt award seats, and compare
+            cash so every trip decision is sharper.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link className="btn btn-coral" href="/offers">
+              Start free
+            </Link>
+            <Link
+              className="btn border border-white/20 bg-white/10 text-white hover:bg-white/15"
+              href="/flights"
+            >
+              Search flights
+            </Link>
+          </div>
+          <p className="mt-4 text-xs text-white/50">
+            Free to start. No credit card. Premium waitlist open.
+          </p>
+        </div>
+      </section>
     </main>
   );
+}
+
+function PricingCard({
+  plan,
+  highlighted,
+}: {
+  plan: (typeof PRICING)[keyof typeof PRICING];
+  highlighted: boolean;
+}) {
+  return (
+    <article
+      className={`rounded-[1.5rem] p-6 ring-1 ${
+        highlighted
+          ? "bg-[var(--ink)] text-white ring-[var(--ink)] shadow-[var(--shadow)]"
+          : "card"
+      }`}
+    >
+      <p
+        className={`text-sm font-semibold ${
+          highlighted ? "text-teal-200" : "text-[var(--accent)]"
+        }`}
+      >
+        {plan.name}
+      </p>
+      <p className="mt-2 text-3xl font-bold tracking-tight">{plan.price}</p>
+      <p
+        className={`mt-1 text-sm ${
+          highlighted ? "text-white/65" : "text-[var(--muted)]"
+        }`}
+      >
+        {plan.period}
+      </p>
+      <ul className="mt-6 space-y-2.5 text-sm">
+        {plan.includes.map((item) => (
+          <li className="flex gap-2" key={item}>
+            <span className={highlighted ? "text-teal-300" : "text-[var(--good)]"}>
+              ✓
+            </span>
+            <span className={highlighted ? "text-white/90" : "text-[var(--ink-soft)]"}>
+              {item}
+            </span>
+          </li>
+        ))}
+        {"locked" in plan
+          ? plan.locked.map((item) => (
+              <li
+                className={`flex gap-2 ${
+                  highlighted ? "text-white/40" : "text-[var(--muted)]"
+                }`}
+                key={item}
+              >
+                <span>○</span>
+                <span>{item}</span>
+              </li>
+            ))
+          : null}
+      </ul>
+      <Link
+        className={`btn mt-8 w-full ${
+          highlighted ? "btn-coral" : "btn-primary"
+        }`}
+        href={plan.href}
+      >
+        {plan.cta}
+      </Link>
+    </article>
+  );
+}
+
+function FeatureIcon({ name }: { name: string }) {
+  const common = "size-5";
+  switch (name) {
+    case "plane":
+      return (
+        <svg className={common} fill="none" viewBox="0 0 24 24">
+          <path
+            d="M3 12l18-8-6 18-3-7-9-3z"
+            stroke="currentColor"
+            strokeLinejoin="round"
+            strokeWidth="1.8"
+          />
+        </svg>
+      );
+    case "cash":
+      return (
+        <svg className={common} fill="none" viewBox="0 0 24 24">
+          <rect
+            height="14"
+            rx="2"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            width="18"
+            x="3"
+            y="5"
+          />
+          <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.8" />
+        </svg>
+      );
+    case "bell":
+      return (
+        <svg className={common} fill="none" viewBox="0 0 24 24">
+          <path
+            d="M6 9a6 6 0 1112 0c0 4 2 5 2 5H4s2-1 2-5zM10 19a2 2 0 004 0"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="1.8"
+          />
+        </svg>
+      );
+    case "grid":
+      return (
+        <svg className={common} fill="none" viewBox="0 0 24 24">
+          <path
+            d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+          />
+        </svg>
+      );
+    case "chart":
+      return (
+        <svg className={common} fill="none" viewBox="0 0 24 24">
+          <path
+            d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="1.8"
+          />
+        </svg>
+      );
+    default:
+      return (
+        <svg className={common} fill="none" viewBox="0 0 24 24">
+          <path
+            d="M12 3l2.2 6.6H21l-5.4 3.9 2.1 6.5L12 16.8 6.3 20l2.1-6.5L3 9.6h6.8L12 3z"
+            stroke="currentColor"
+            strokeLinejoin="round"
+            strokeWidth="1.6"
+          />
+        </svg>
+      );
+  }
 }

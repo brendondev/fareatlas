@@ -1,47 +1,67 @@
 # FareAtlas
 
-MVP for Australians deciding whether to travel with points or pay cash.
+Australia-first travel intelligence: **loyalty offers**, **award seats**, and **cash fares** — so you know when to use points and when to pay dollars.
+
+Inspired by products like Points Now, with a warmer product UI and an explicit cash-vs-points edge.
 
 ## Stack
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- Mock data now, API adapters isolated in `src/lib/api.ts`
+| Layer | Choice |
+| --- | --- |
+| App | Next.js App Router + TypeScript |
+| UI | Tailwind CSS v4 |
+| Database | **Neon PostgreSQL** via Prisma |
+| Awards | Seats.aero Partner API |
+| Cash (next) | Amadeus |
+| Hosting | Vercel |
 
-## Integrations
+## Features (MVP)
 
-| Stage | Provider | Status |
-| --- | --- | --- |
-| 1 Award availability | Seats.aero Partner API | Wired (`AWARD_AVAILABILITY_API_KEY`) |
-| 2 Cash fares | Amadeus (planned) | Mock |
-| 3 Loyalty offers | Editorial / admin | Mock |
-| 4 Notifications | Resend / Twilio | Not started |
-| 5 Database | Neon Postgres | Not started |
+- Marketing home with programs, offers, award cabins, pricing Free / Premium
+- `/offers` — Qantas, Velocity, Everyday Rewards, Flybuys catalogue (Neon + fallback)
+- `/flights` — Seats.aero search, trip detail, cash watch, route alert capture
+- `/pricing` — Free vs Premium (Stripe waitlist next)
+- API: `/api/awards/*`, `/api/offers`, `/api/watches`
 
-### Seats.aero (local)
+## Local setup
 
 ```bash
+npm install
 cp .env.example .env.local
-# paste AWARD_AVAILABILITY_API_KEY=
+# Add Neon DATABASE_URL + DIRECT_URL
+# Add AWARD_AVAILABILITY_API_KEY for live award search
+
+npx prisma generate
+npx prisma db push
+npm run db:seed
 npm run dev
 ```
 
-Endpoints:
+Open [http://localhost:3000](http://localhost:3000).
 
-- `GET /api/awards/search?origin=SYD&destination=HND`
-- `GET /api/awards/{availabilityId}/trips`
+Without `DATABASE_URL`, the app still runs using demo offers/cash data.
 
-See `GUIA-APIS.md` for the full provider checklist.
+## Neon on Vercel
 
-## Local dev
+1. Vercel project → Storage / Integrations → **Neon**
+2. Confirm env vars:
+   - `DATABASE_URL` — pooled
+   - `DIRECT_URL` — unpooled (`DATABASE_URL_UNPOOLED` if that is what Neon created)
+3. Also set `AWARD_AVAILABILITY_API_KEY`, `NEXT_PUBLIC_APP_URL` if needed
+4. Deploy — build runs `scripts/db-setup.mjs` (`prisma db push` + seed)
 
-```bash
-npm run dev
-```
+Force re-seed once: set `FORCE_SEED=1`, redeploy, remove it.
 
-## Deploy recommendation
+## Scripts
 
-Use Vercel now and Neon for Postgres. This is the fastest path for the current Next.js build, scheduled jobs can be added through Vercel Cron, and the database can later move or stay external when migrating the app/API to a VPS.
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Local server |
+| `npm run build` | DB setup + production build |
+| `npm run db:push` | Sync Prisma schema to Neon |
+| `npm run db:seed` | Seed programs, offers, cash fares |
+| `npm run db:setup` | generate + push + seed |
 
-When moving to a VPS, keep Neon as the managed database unless cost or data residency requires self-hosted Postgres. Move only the app/API first.
+## Provider guide
+
+See [GUIA-APIS.md](./GUIA-APIS.md) for the staged integration checklist.
