@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   AU_FOCUS_SOURCES,
   isSeatsAeroConfigured,
-  mapSearchResults,
   SeatsAeroError,
 } from "@/lib/seats-aero";
 import { searchAwardsForViewer } from "@/lib/awards";
@@ -132,9 +131,10 @@ export async function GET(request: NextRequest) {
       tier,
       clamped,
       clampedAtAll,
+      // Already mapped AND stripped of cabins this tier can't see. Do not map
+      // `response.data` here — those rows carry every cabin inline.
+      results,
     } = gated;
-
-    const results = mapSearchResults(response.data ?? []);
 
     return NextResponse.json({
       configured: true,

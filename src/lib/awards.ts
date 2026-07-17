@@ -11,9 +11,10 @@ import {
 import {
   awardCacheDayKey,
   getTripsCached,
+  mapSearchResults,
   searchAwardsCached,
 } from "./seats-aero";
-import type { CachedSearchParams } from "./seats-aero";
+import type { AwardResult, CachedSearchParams } from "./seats-aero";
 
 /**
  * The only sanctioned door to award data.
@@ -25,12 +26,42 @@ import type { CachedSearchParams } from "./seats-aero";
  * that callers remember to run, it is the only way through.
  */
 
+/**
+ * Strips cabins the viewer's plan doesn't cover out of each row.
+ *
+ * Clamping the query is not enough on its own. Seats.aero's `cabins` filter
+ * decides which availabilities come back, but every row it returns carries all
+ * four cabins inline (JMileageCost, FAvailable, and so on). Ask for Economy
+ * and you still receive Business mileage costs. Serialising the row as-is
+ * leaks exactly the data Premium sells, even though `bestCabin` — and so the
+ * UI — looks correct. That is the hide-it-in-CSS paywall, one layer down.
+ *
+ * The cached payload deliberately keeps every cabin: it is shared across
+ * tiers. Filtering belongs here, on the way out, per viewer.
+ */
+function filterResultsForTier(results: AwardResult[], tier: Tier): AwardResult[] {
+  return results
+    .map((row) => {
+      const cabins = row.cabins.filter((offer) => cabinAllowed(offer.cabin, tier));
+      const best = cabins
+        .filter((offer) => offer.available && offer.mileageCost !== null)
+        .sort((a, b) => (a.mileageCost ?? Infinity) - (b.mileageCost ?? Infinity))[0];
+
+      return { ...row, cabins, bestCabin: best ?? null };
+    })
+    // A row whose only availability was in a cabin this plan can't see has
+    // nothing left to show.
+    .filter((row) => row.bestCabin !== null);
+}
+
 export type GatedSearch = Awaited<ReturnType<typeof searchAwardsCached>> & {
   tier: Tier;
   clamped: Clamp;
   clampedAtAll: boolean;
   /** What was actually asked of Seats.aero, after clamping. */
   params: CachedSearchParams;
+  /** Mapped and tier-filtered. Callers must serialise these, not response.data. */
+  results: AwardResult[];
 };
 
 export async function searchAwardsForViewer(
@@ -51,12 +82,20 @@ export async function searchAwardsForViewer(
   // free users read.
   const result = await searchAwardsCached(params);
 
+  // Mapping happens in here rather than in the route so that filtering cannot
+  // be forgotten at the call site.
+  const results = filterResultsForTier(
+    mapSearchResults(result.response.data ?? []),
+    tier,
+  );
+
   return {
     ...result,
     tier,
     clamped,
     clampedAtAll: isClamped(clamped),
     params,
+    results,
   };
 }
 
