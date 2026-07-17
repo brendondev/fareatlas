@@ -179,11 +179,17 @@ model AwardWatch {
   lastHitAt      DateTime?
   /// Human summary of the last hit, e.g. "Business SYD→HND · 90k pts · 2 seats".
   lastHitSummary String?
-  /// Opaque one-click unsubscribe token. Lives on the watch, not AuthToken,
-  /// whose required userId FK doesn't fit anonymous watches.
-  unsubToken     String?   @unique
+  /// Opaque one-click unsubscribe token (192 random bits). Lives on the watch,
+  /// not AuthToken, whose required userId FK doesn't fit anonymous watches.
+  ///
+  /// NOT @unique on purpose: adding a unique constraint to a populated table
+  /// trips Prisma db push's data-loss gate, and `db-setup.mjs` runs without
+  /// --accept-data-loss (which would blindly accept any future data loss).
+  /// The randomness makes collisions a non-issue; lookups use findFirst.
+  unsubToken     String?
 
   @@index([status, lastCheckedAt])
+  @@index([unsubToken])
   @@index([email, status])
   @@index([userId, status])
   @@index([origin, destination])

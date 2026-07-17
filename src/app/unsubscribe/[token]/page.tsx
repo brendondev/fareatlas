@@ -20,7 +20,7 @@ export default async function UnsubscribePage({
   let route: string | null = null;
   if (isDatabaseConfigured() && token) {
     const watch = await prisma.awardWatch
-      .findUnique({
+      .findFirst({
         where: { unsubToken: token },
         select: { origin: true, destination: true },
       })
