@@ -91,11 +91,9 @@ export default async function AccountPage() {
             </Link>
           </div>
 
-          {/* Honest about the gap: nothing reads this table and sends anything
-              yet. Saying "we'll alert you" here would be selling vapour. */}
           <p className="mt-5 text-xs leading-relaxed text-[var(--muted)]">
-            Alerting isn&apos;t switched on yet — we&apos;re saving these so
-            they&apos;re ready the day it is. Nothing will email you until then.
+            We watch these in the background and flag seats as they open. Manage
+            them to see the latest.
           </p>
         </section>
 

@@ -39,7 +39,10 @@ import type { AwardResult, CachedSearchParams } from "./seats-aero";
  * The cached payload deliberately keeps every cabin: it is shared across
  * tiers. Filtering belongs here, on the way out, per viewer.
  */
-function filterResultsForTier(results: AwardResult[], tier: Tier): AwardResult[] {
+export function filterResultsForTier(
+  results: AwardResult[],
+  tier: Tier,
+): AwardResult[] {
   return results
     .map((row) => {
       const cabins = row.cabins.filter((offer) => cabinAllowed(offer.cabin, tier));

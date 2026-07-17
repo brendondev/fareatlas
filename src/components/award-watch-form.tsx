@@ -54,8 +54,8 @@ export function AwardWatchForm() {
         Tell us where you want to fly
       </h3>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        Free email capture for now. Premium unlimited alerts land with Stripe +
-        Resend.
+        We&apos;ll watch this route and let you know when seats open. Economy on
+        Free, every cabin on Premium.
       </p>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">

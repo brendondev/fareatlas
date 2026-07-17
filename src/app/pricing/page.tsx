@@ -34,10 +34,10 @@ export default async function PricingPage() {
       <section className="mx-auto mt-14 max-w-2xl" id="waitlist">
         <WaitlistForm defaultEmail={viewer.user?.email} />
         <p className="mt-4 text-center text-xs leading-relaxed text-[var(--muted)]">
-          Straight answer on what Premium isn&apos;t yet: there is no billing,
-          and route alerts don&apos;t send. We save the routes you watch so
-          they&apos;re ready the day alerting ships — nothing emails you before
-          then.
+          Straight answer on what Premium isn&apos;t yet: there&apos;s no
+          billing, so it can&apos;t be bought. Route alerts do work — we watch
+          your routes and flag seats as they open, Economy on Free and every
+          cabin on Premium. Email delivery turns on once our sender is verified.
         </p>
       </section>
     </main>

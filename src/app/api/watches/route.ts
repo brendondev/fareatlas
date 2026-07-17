@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer } from "@/lib/dal";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
@@ -75,6 +76,9 @@ export async function POST(request: NextRequest) {
         destination,
         cabins,
         status: "active",
+        // One-click unsubscribe token, minted up front so alert emails always
+        // have a link (older rows get one lazily in the alerts cron).
+        unsubToken: randomBytes(24).toString("base64url"),
       },
     });
 
