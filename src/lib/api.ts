@@ -5,8 +5,8 @@
  */
 export { getCashFares, getOffers, getProgramsFromDb } from "./offers";
 export {
-  cachedSearch,
-  getTrips,
   isSeatsAeroConfigured,
   mapSearchResults,
+  searchAwardsCached,
+  getTripsCached,
 } from "./seats-aero";

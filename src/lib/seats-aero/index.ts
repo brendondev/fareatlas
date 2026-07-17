@@ -1,6 +1,6 @@
+// `cachedSearch` / `getTrips` are deliberately NOT re-exported: they call the
+// Partner API with unclamped params. Everything goes through `./with-cache`.
 export {
-  cachedSearch,
-  getTrips,
   getSeatsAeroApiKey,
   isSeatsAeroConfigured,
   SeatsAeroError,

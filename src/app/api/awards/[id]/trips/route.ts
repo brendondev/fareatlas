@@ -38,26 +38,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
     request.nextUrl.searchParams.get("refresh") === "true";
 
   try {
-    let source: "cache" | "api" = "api";
-    let dayKey: string | null = null;
-    let cacheHits = 0;
-    let response;
-
-    if (bypassCache) {
-      const { getTrips } = await import("@/lib/seats-aero/client");
-      const { setCachedTrips, awardCacheDayKey } = await import(
-        "@/lib/seats-aero/cache"
-      );
-      response = await getTrips(id, { includeFiltered });
-      await setCachedTrips(id, includeFiltered, response);
-      dayKey = awardCacheDayKey();
-    } else {
-      const cached = await getTripsCached(id, { includeFiltered });
-      response = cached.response;
-      source = cached.source;
-      dayKey = cached.dayKey;
-      cacheHits = cached.hitCount;
-    }
+    const cached = await getTripsCached(id, {
+      includeFiltered,
+      refresh: bypassCache,
+    });
+    const { response, source, dayKey, hitCount: cacheHits } = cached;
 
     const trips = (response.data ?? []).map((trip) => ({
       id: trip.ID,

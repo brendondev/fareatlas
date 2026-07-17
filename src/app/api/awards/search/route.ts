@@ -119,27 +119,10 @@ export async function GET(request: NextRequest) {
   };
 
   try {
-    let source: "cache" | "api" = "api";
-    let dayKey: string | null = null;
-    let cacheHits = 0;
-    let response;
-
-    if (bypassCache) {
-      const { cachedSearch } = await import("@/lib/seats-aero/client");
-      const { setCachedSearch, awardCacheDayKey } = await import(
-        "@/lib/seats-aero/cache"
-      );
-      response = await cachedSearch(searchParams);
-      await setCachedSearch(searchParams, response);
-      dayKey = awardCacheDayKey();
-      source = "api";
-    } else {
-      const cached = await searchAwardsCached(searchParams);
-      response = cached.response;
-      source = cached.source;
-      dayKey = cached.dayKey;
-      cacheHits = cached.hitCount;
-    }
+    const cached = await searchAwardsCached(searchParams, {
+      refresh: bypassCache,
+    });
+    const { response, source, dayKey, hitCount: cacheHits } = cached;
 
     const results = mapSearchResults(response.data ?? []);
 

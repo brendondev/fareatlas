@@ -1,46 +1,23 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { PROGRAMS } from "../src/lib/programs";
 
 const prisma = new PrismaClient();
 
-const programs = [
-  {
-    slug: "qantas",
-    name: "Qantas Points",
-    shortCode: "QF",
-    description:
-      "Track and maximise Qantas Frequent Flyer earn opportunities across flights, retail and marketplace.",
-    color: "#E40000",
-    sortOrder: 1,
-  },
-  {
-    slug: "velocity",
-    name: "Velocity",
-    shortCode: "VA",
-    description:
-      "Never miss a Virgin Australia Velocity bonus on flights, partners and status offers.",
-    color: "#E10A17",
-    sortOrder: 2,
-  },
-  {
-    slug: "everyday",
-    name: "Everyday Rewards",
-    shortCode: "ER",
-    description:
-      "Stack more Everyday Rewards points on everyday shopping and partner boosts.",
-    color: "#E31837",
-    sortOrder: 3,
-  },
-  {
-    slug: "flybuys",
-    name: "Flybuys",
-    shortCode: "FB",
-    description:
-      "Earn Flybuys on Coles, partners and boost weeks — sorted by value.",
-    color: "#00A9E0",
-    sortOrder: 4,
-  },
-] as const;
+/**
+ * Derived from `src/lib/programs.ts` — the single source of truth for program
+ * identity. That const doubles as the no-DB fallback, so seeding from anything
+ * else lets Neon and the fallback drift apart (they already had, on colour).
+ * `accent` stays out: it is presentation, and only the const needs it.
+ */
+const programs = PROGRAMS.map((program, index) => ({
+  slug: program.slug,
+  name: program.name,
+  shortCode: program.shortCode,
+  description: program.description,
+  color: program.color,
+  sortOrder: index + 1,
+}));
 
 function daysFromNow(days: number) {
   const d = new Date();

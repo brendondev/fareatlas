@@ -18,8 +18,10 @@ export default function PricingPage() {
         </span>
         <h1 className="section-title mt-4">Start free. Go Premium when you want every seat.</h1>
         <p className="section-lead mx-auto">
-          Same shape as Points Now — free browsing for offers, Premium for full
-          award windows and alerts — plus FareAtlas cash comparisons.
+          Browse every offer and search Economy awards for nothing, forever.
+          Premium opens every cabin and the full 12-month window — and both
+          plans show you the cash fare beside the points, so you always know
+          which one is actually the better deal.
         </p>
       </div>
 
