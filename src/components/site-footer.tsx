@@ -23,6 +23,9 @@ export function SiteFooter() {
             <Link className="hover:text-[var(--ink)]" href="/flights">
               Flights
             </Link>
+            <Link className="hover:text-[var(--ink)]" href="/guides">
+              Guides
+            </Link>
             <Link className="hover:text-[var(--ink)]" href="/pricing">
               Pricing
             </Link>

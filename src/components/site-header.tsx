@@ -9,6 +9,7 @@ import type { Viewer } from "@/lib/dal";
 const NAV = [
   { href: "/offers", label: "Offers" },
   { href: "/flights", label: "Flights" },
+  { href: "/guides", label: "Guides" },
   { href: "/pricing", label: "Pricing" },
 ];
 

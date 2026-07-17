@@ -262,3 +262,91 @@ table,
   height: 0.55rem;
   border-radius: 999px;
 }
+
+/* Rendered guide markdown. Remark emits bare tags; these carry the dark theme
+ * and keep body copy in Inter with display headings in Fraunces. */
+.prose-guide {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.prose-guide h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-guide h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-guide p {
+  margin: 1rem 0;
+}
+
+.prose-guide ul,
+.prose-guide ol {
+  margin: 1rem 0;
+  padding-left: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prose-guide ul {
+  list-style: disc;
+}
+
+.prose-guide ol {
+  list-style: decimal;
+}
+
+.prose-guide li::marker {
+  color: var(--accent);
+}
+
+.prose-guide a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.prose-guide a:hover {
+  text-decoration: underline;
+}
+
+.prose-guide strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.prose-guide blockquote {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1.15rem;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 0.75rem 0.75rem 0;
+  font-size: 1.05rem;
+}
+
+.prose-guide blockquote p {
+  margin: 0;
+  color: var(--ink);
+}
+
+.prose-guide code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  padding: 0.1rem 0.35rem;
+}
