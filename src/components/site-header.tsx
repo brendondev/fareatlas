@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { SITE } from "@/lib/content";
+import type { Viewer } from "@/lib/dal";
 
 const NAV = [
   { href: "/offers", label: "Offers" },
@@ -11,9 +12,15 @@ const NAV = [
   { href: "/pricing", label: "Pricing" },
 ];
 
-export function SiteHeader() {
+/**
+ * `viewer` arrives as a prop from the root layout: this is a client component
+ * and must not reach into the DAL. It decides which buttons to draw, nothing
+ * more — the pages themselves enforce access.
+ */
+export function SiteHeader({ viewer }: { viewer: Viewer }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { authConfigured, user } = viewer;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(11,13,16,0.72)] backdrop-blur-xl">
@@ -53,12 +60,36 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Link className="btn btn-secondary h-10" href="/flights">
-            Search seats
-          </Link>
-          <Link className="btn btn-accent h-10" href="/offers">
-            Browse offers
-          </Link>
+          {!authConfigured ? (
+            // No accounts on this deployment. Show the old CTAs rather than a
+            // disabled "Sign in", which would imply a broken feature.
+            <>
+              <Link className="btn btn-secondary h-10" href="/flights">
+                Search seats
+              </Link>
+              <Link className="btn btn-accent h-10" href="/offers">
+                Browse offers
+              </Link>
+            </>
+          ) : user ? (
+            <>
+              <Link className="btn btn-secondary h-10" href="/flights">
+                Search seats
+              </Link>
+              <Link className="btn btn-accent h-10" href="/account">
+                Account
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="btn btn-ghost h-10" href="/login">
+                Sign in
+              </Link>
+              <Link className="btn btn-accent h-10" href="/register">
+                Get started
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -84,13 +115,42 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              className="btn btn-accent mt-2"
-              href="/flights"
-              onClick={() => setOpen(false)}
-            >
-              Search award seats
-            </Link>
+            {authConfigured ? (
+              user ? (
+                <Link
+                  className="btn btn-accent mt-2"
+                  href="/account"
+                  onClick={() => setOpen(false)}
+                >
+                  Account
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    className="rounded-xl px-3 py-3 text-sm font-medium hover:bg-[var(--soft)]"
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    className="btn btn-accent mt-2"
+                    href="/register"
+                    onClick={() => setOpen(false)}
+                  >
+                    Get started
+                  </Link>
+                </>
+              )
+            ) : (
+              <Link
+                className="btn btn-accent mt-2"
+                href="/flights"
+                onClick={() => setOpen(false)}
+              >
+                Search award seats
+              </Link>
+            )}
           </div>
         </div>
       ) : null}

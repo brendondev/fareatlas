@@ -16,68 +16,170 @@ model LoyaltyProgram {
   name        String
   shortCode   String
   description String
-  color       String   @default("#0f766e")
+  color       String   @default("#c9a961")
   sortOrder   Int      @default(0)
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  offers Offer[]
+  offers       Offer[]
+  userPrograms UserProgram[]
+}
+
+/// A registered account. Identity used to live as a loose email string on
+/// AwardWatch; this is now the real thing.
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  passwordHash String
+  name         String?
+
+  /// free | premium. A String rather than an enum, matching Offer.status and
+  /// AwardWatch.status. Narrowed in TS at the DAL boundary, where anything
+  /// unrecognised fails closed to "free".
+  ///
+  /// There is no billing yet, so nothing in the app writes this — premium is
+  /// granted by hand in the Neon console. tierNote records why.
+  tier      String    @default("free")
+  tierNote  String?
+  tierSince DateTime?
+
+  /// Unused until the email phase. Shipped now so that adding it later doesn't
+  /// mean altering a table that by then holds real accounts.
+  emailVerified DateTime?
+
+  /// Per-account lockout, complementing the IP/email rate limit.
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  watches  AwardWatch[]
+  programs UserProgram[]
+  tokens   AuthToken[]
+
+  @@index([tier])
+}
+
+/// Programs a user follows — the "my programs" list on /account.
+model UserProgram {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  programId String
+  program   LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@unique([userId, programId])
+  @@index([userId])
+}
+
+/// Password reset and email verification tokens. Only the SHA-256 of the
+/// emailed token is stored, so a database leak cannot be replayed.
+model AuthToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  purpose   String // reset | verify
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, purpose])
+  @@index([expiresAt])
+}
+
+/// Fixed-window rate limiter, in the database on purpose.
+///
+/// An in-memory Map is worse than nothing here: every serverless instance has
+/// its own heap and they scale horizontally and cold-start freely, so a limit
+/// of 5 silently becomes 5xN and resets on deploy. Auth requires DATABASE_URL
+/// by construction (see lib/auth-config.ts), so the table is always available
+/// on any path that needs limiting.
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. "login:ip:1.2.3.4" | "login:email:a@b.c"
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+
+  @@index([windowStart])
+}
+
+/// Premium interest, captured on /pricing while billing does not exist.
+model PremiumWaitlist {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  userId    String?
+  reason    String?
+  createdAt DateTime @default(now())
 }
 
 model Offer {
-  id          String    @id @default(cuid())
+  id          String         @id @default(cuid())
   programId   String
   program     LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
   title       String
   summary     String
-  category    String    // groceries | travel | shopping | marketplace | cards | wine | other
+  category    String // groceries | travel | shopping | marketplace | cards | wine | other
   estimate    String?
   url         String?
-  featured    Boolean   @default(false)
-  status      String    @default("published") // draft | published | archived
+  featured    Boolean        @default(false)
+  status      String         @default("published") // draft | published | archived
   expiresAt   DateTime?
-  publishedAt DateTime  @default(now())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime       @default(now())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@index([status, publishedAt])
   @@index([programId, status])
   @@index([category])
 }
 
-/// Saved award watch (email capture until full auth).
+/// A watched route.
+///
+/// `email` stays, and `userId` is nullable, for two reasons: rows created
+/// before accounts existed have no user to point at and must survive, and
+/// anonymous watches are still allowed. On register/login we claim orphans by
+/// matching email, so someone who watched a route before signing up keeps it.
+///
+/// Deliberately not `userId String @unique`: a user has many watches, and a
+/// non-null unique column cannot be added to a populated table anyway.
 model AwardWatch {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   email       String
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   origin      String
   destination String
-  cabins      String   @default("economy,business") // comma-separated
-  programs    String?  // optional seats.aero sources
+  cabins      String    @default("economy,business") // comma-separated
+  programs    String? // optional seats.aero sources
   startDate   DateTime?
   endDate     DateTime?
-  status      String   @default("active") // active | paused | unsubscribed
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      String    @default("active") // active | paused | unsubscribed
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([email, status])
+  @@index([userId, status])
   @@index([origin, destination])
 }
 
 /// Cached cash fare snapshots (Amadeus later; seed for demo).
 model CashFare {
-  id            String   @id @default(cuid())
-  origin        String
-  destination   String
-  routeLabel    String
-  airline       String
-  travelWindow  String
-  priceAud      Float
-  note          String?
-  active        Boolean  @default(true)
-  capturedAt    DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  origin       String
+  destination  String
+  routeLabel   String
+  airline      String
+  travelWindow String
+  priceAud     Float
+  note         String?
+  active       Boolean  @default(true)
+  capturedAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([origin, destination, active])
 }
@@ -113,15 +215,15 @@ model AwardSearchCache {
 
 /// Daily Seats.aero trip-detail cache for Availability IDs.
 model AwardTripCache {
-  id             String   @id @default(cuid())
-  queryKey       String   @unique
-  dayKey         String
-  availabilityId String
-  includeFiltered Boolean @default(false)
-  responseJson   String
-  hitCount       Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(cuid())
+  queryKey        String   @unique
+  dayKey          String
+  availabilityId  String
+  includeFiltered Boolean  @default(false)
+  responseJson    String
+  hitCount        Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([dayKey])
   @@index([availabilityId, dayKey])

@@ -3,6 +3,7 @@ import { Fraunces, Inter } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE } from "@/lib/content";
+import { getViewer } from "@/lib/dal";
 import "./globals.css";
 
 /**
@@ -43,11 +44,20 @@ export const metadata: Metadata = {
   description: SITE.description,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Reading the session here opts every page into dynamic rendering, which is
+  // the unavoidable price of a personalised header. Accepted for now; if TTFB
+  // or crawl budget suffers, the fix is a Suspense-wrapped header slot rather
+  // than dropping the check.
+  //
+  // This is NOT an auth boundary — layouts don't re-render on navigation. It
+  // only decides which buttons to draw. Pages call the DAL themselves.
+  const viewer = await getViewer();
+
   return (
     // `data-scroll-behavior` is required from Next 16 on: the framework no
     // longer overrides `scroll-behavior: smooth` during navigation, so without
@@ -58,7 +68,7 @@ export default function RootLayout({
       lang="en-AU"
     >
       <body>
-        <SiteHeader />
+        <SiteHeader viewer={viewer} />
         {children}
         <SiteFooter />
       </body>
