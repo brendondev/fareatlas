@@ -78,3 +78,7 @@ Force re-seed once: set `FORCE_SEED=1`, redeploy, remove it.
 ## Provider guide
 
 See [GUIA-APIS.md](./GUIA-APIS.md) for the staged integration checklist.
+
+## Session logs
+
+- [17 Jul 2026 — full build diary](./docs/DIARIO-2026-07-17.md) (Seats.aero, Points Now UI, Neon, daily award cache)
