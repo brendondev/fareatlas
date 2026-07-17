@@ -111,7 +111,7 @@ export default async function FlightsPage() {
               activity presented as live — see the note in lib/content.ts. It
               comes back when it can be built from real AwardSearchCache rows. */}
 
-          <AwardWatchForm />
+          <AwardWatchForm signedIn={Boolean(viewer.user)} tier={viewer.tier} />
         </div>
       </section>
     </main>

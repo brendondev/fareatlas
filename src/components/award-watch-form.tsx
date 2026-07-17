@@ -2,8 +2,20 @@
 
 import { useState, type FormEvent } from "react";
 
-export function AwardWatchForm() {
-  const [email, setEmail] = useState("");
+/**
+ * Create an award-seat watch from the flights page.
+ *
+ * Signed in: no email field — we already have the account address, and asking
+ * for it again made this look like a newsletter box. Just the route.
+ * Signed out: not rendered at all; the search panel carries the sign-up call.
+ */
+export function AwardWatchForm({
+  signedIn,
+  tier,
+}: {
+  signedIn: boolean;
+  tier: "free" | "premium";
+}) {
   const [origin, setOrigin] = useState("SYD");
   const [destination, setDestination] = useState("HND");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
@@ -11,34 +23,29 @@ export function AwardWatchForm() {
   );
   const [message, setMessage] = useState<string | null>(null);
 
+  if (!signedIn) return null;
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setStatus("loading");
     setMessage(null);
     try {
+      // The API reads the account email and tier server-side from the session,
+      // and derives the watched cabins from that tier. The body only carries
+      // the route — the client is not trusted to pick cabins or identity.
       const res = await fetch("/api/watches", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          origin,
-          destination,
-          cabins: "economy,premium,business",
-        }),
+        body: JSON.stringify({ origin, destination }),
       });
       const data = await res.json();
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Could not save alert.");
+        setMessage(data.error ?? "Could not save this watch.");
         return;
       }
       setStatus("ok");
-      setMessage(
-        data.source === "fallback"
-          ? "Saved locally for demo. Connect Neon to persist watches."
-          : "You're on the list — we'll watch this route for award seats.",
-      );
-      setEmail("");
+      setMessage("Watching this route — we'll flag seats as they open.");
     } catch {
       setStatus("error");
       setMessage("Network error. Try again.");
@@ -48,28 +55,19 @@ export function AwardWatchForm() {
   return (
     <form className="card p-5 sm:p-6" onSubmit={onSubmit}>
       <p className="text-sm font-semibold text-[var(--accent)]">
-        Award seat alert
+        Watch a route
       </p>
-      <h3 className="mt-1 text-xl font-bold tracking-tight">
-        Tell us where you want to fly
+      <h3 className="mt-1 font-display text-xl font-semibold tracking-tight">
+        Get told when seats open
       </h3>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        We&apos;ll watch this route and let you know when seats open. Economy on
-        Free, every cabin on Premium.
+        We check in the background and alert you.{" "}
+        {tier === "premium"
+          ? "Every cabin on your plan."
+          : "Economy on Free — Premium opens every cabin."}
       </p>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <label className="text-xs font-semibold text-[var(--muted)]">
-          Email
-          <input
-            className="mt-1 h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--soft)] px-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)]"
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@email.com"
-            required
-            type="email"
-            value={email}
-          />
-        </label>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <label className="text-xs font-semibold text-[var(--muted)]">
           From
           <input
@@ -93,7 +91,7 @@ export function AwardWatchForm() {
       </div>
 
       <button
-        className="btn btn-primary mt-4 w-full sm:w-auto"
+        className="btn btn-accent mt-4 w-full"
         disabled={status === "loading"}
         type="submit"
       >

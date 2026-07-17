@@ -4,15 +4,12 @@ import { getViewer } from "@/lib/dal";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
 import { entitlementsFor } from "@/lib/entitlements";
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const IATA = /^[A-Za-z]{3}$/;
 
 export async function POST(request: NextRequest) {
   let body: {
-    email?: string;
     origin?: string;
     destination?: string;
-    cabins?: string;
   };
 
   try {
@@ -21,14 +18,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const email = body.email?.trim().toLowerCase() ?? "";
+  // The form is signed-in only; the account is the source of truth for who is
+  // watching and what they may watch. We never trust an email or cabin list off
+  // the wire — email comes from the session, cabins from the tier.
+  const viewer = await getViewer();
+  if (!viewer.user) {
+    return NextResponse.json(
+      { error: "Sign in to watch a route." },
+      { status: 401 },
+    );
+  }
+
+  const email = viewer.user.email;
   const origin = body.origin?.trim().toUpperCase() ?? "";
   const destination = body.destination?.trim().toUpperCase() ?? "";
-  const cabins = body.cabins?.trim() || "economy,business";
+  const cabins = entitlementsFor(viewer.tier).cabins.join(",");
 
-  if (!EMAIL.test(email)) {
-    return NextResponse.json({ error: "Valid email is required." }, { status: 400 });
-  }
   if (!IATA.test(origin) || !IATA.test(destination)) {
     return NextResponse.json(
       { error: "Origin and destination must be 3-letter IATA codes." },
@@ -36,22 +41,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // A signed-in session implies auth (and therefore Neon) is configured, so
+  // there is no in-memory fallback path here — the watch is persisted or fails.
   if (!isDatabaseConfigured()) {
-    return NextResponse.json({
-      ok: true,
-      source: "fallback",
-      watch: { email, origin, destination, cabins },
-    });
+    return NextResponse.json(
+      { error: "Could not save watch. Check Neon connection." },
+      { status: 500 },
+    );
   }
 
   try {
-    const viewer = await getViewer();
     const limit = entitlementsFor(viewer.tier).maxWatches;
 
-    // Signed-in watches are counted against the plan. Anonymous ones are keyed
-    // only by an unverified email, so counting them would let anybody exhaust a
-    // stranger's allowance by typing their address.
-    if (viewer.user && Number.isFinite(limit)) {
+    if (Number.isFinite(limit)) {
       const existing = await prisma.awardWatch.count({
         where: { userId: viewer.user.id, status: "active" },
       });
@@ -71,7 +73,7 @@ export async function POST(request: NextRequest) {
     const watch = await prisma.awardWatch.create({
       data: {
         email,
-        userId: viewer.user?.id,
+        userId: viewer.user.id,
         origin,
         destination,
         cabins,

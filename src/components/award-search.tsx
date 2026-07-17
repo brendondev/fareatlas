@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Fragment,
   useCallback,
@@ -228,6 +229,14 @@ export function AwardSearch({
     },
     [tripsById],
   );
+
+  // Signed-out: live search is gated. Show blurred, clearly-labelled sample
+  // rows behind a sign-up call — enticing, but never presented as real
+  // availability (that was the RECENT_AWARDS mistake). This takes precedence
+  // over the "API key needed" ops hint, which is not for public visitors.
+  if (!signedIn) {
+    return <LockedSearch />;
+  }
 
   if (!configured) {
     return (
@@ -509,6 +518,76 @@ export function AwardSearch({
           then compare with cash fares on the side panel.
         </p>
       )}
+    </div>
+  );
+}
+
+/**
+ * Signed-out state: blurred sample rows behind a sign-up call. The rows are
+ * illustrative and labelled as examples — never claimed as live availability.
+ */
+function LockedSearch() {
+  const samples = [
+    { date: "12 Sep", route: "SYD → HND", cabin: "Business", program: "Qantas", pts: "90,000" },
+    { date: "03 Oct", route: "MEL → SIN", cabin: "Business", program: "Velocity", pts: "68,000" },
+    { date: "21 Oct", route: "SYD → LAX", cabin: "Economy", program: "Qantas", pts: "45,000" },
+    { date: "08 Nov", route: "BNE → NRT", cabin: "First", program: "Qantas", pts: "144,000" },
+  ];
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--panel)]">
+      {/* Blurred, non-interactive sample table */}
+      <div
+        aria-hidden
+        className="pointer-events-none select-none blur-[3px] opacity-50"
+      >
+        <table className="w-full min-w-[520px] border-collapse text-left text-sm">
+          <thead className="bg-[var(--soft)] text-[var(--muted)]">
+            <tr>
+              <th className="px-4 py-3 font-semibold">Date</th>
+              <th className="px-4 py-3 font-semibold">Route</th>
+              <th className="px-4 py-3 font-semibold">Cabin</th>
+              <th className="px-4 py-3 font-semibold">Program</th>
+              <th className="px-4 py-3 font-semibold">Points</th>
+            </tr>
+          </thead>
+          <tbody className="tabular">
+            {samples.map((row) => (
+              <tr className="border-t border-[var(--line)]" key={row.date + row.route}>
+                <td className="px-4 py-3">{row.date}</td>
+                <td className="px-4 py-3 font-semibold">{row.route}</td>
+                <td className="px-4 py-3">{row.cabin}</td>
+                <td className="px-4 py-3 text-[var(--muted)]">{row.program}</td>
+                <td className="px-4 py-3 font-bold text-[var(--accent)]">{row.pts}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Overlay CTA */}
+      <div className="absolute inset-0 flex items-center justify-center bg-[rgba(11,13,16,0.55)] p-6 backdrop-blur-[1px]">
+        <div className="max-w-sm text-center">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
+            Illustrative examples
+          </p>
+          <h3 className="mt-2 font-display text-xl font-semibold">
+            Create a free account to search live award seats
+          </h3>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Free covers Economy across the next 90 days. Premium opens every
+            cabin and the full year.
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Link className="btn btn-accent h-10" href="/register?next=/flights">
+              Create free account
+            </Link>
+            <Link className="btn btn-secondary h-10" href="/login?next=/flights">
+              Sign in
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
