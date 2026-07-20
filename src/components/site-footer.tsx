@@ -23,6 +23,12 @@ export function SiteFooter() {
             <Link className="hover:text-[var(--ink)]" href="/flights">
               Flights
             </Link>
+            <Link className="hover:text-[var(--ink)]" href="/marketplace">
+              Marketplace
+            </Link>
+            <Link className="hover:text-[var(--ink)]" href="/partners">
+              Partners
+            </Link>
             <Link className="hover:text-[var(--ink)]" href="/wine">
               Wine
             </Link>
@@ -34,6 +40,9 @@ export function SiteFooter() {
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/guides">
               Guides
+            </Link>
+            <Link className="hover:text-[var(--ink)]" href="/perks">
+              Premium perks
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/pricing">
               Pricing

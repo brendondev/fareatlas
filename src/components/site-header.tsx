@@ -17,13 +17,16 @@ const EARN = [
 
 const NAV = [
   { href: "/flights", label: "Flights" },
-  // Alerts is inserted between Flights and Guides only when auth is switched
+  // Alerts is inserted between Flights and Marketplace when auth is switched
   // on — it's account-gated and would frustrate an anonymous click.
+  { href: "/marketplace", label: "Marketplace" },
+  { href: "/partners", label: "Partners" },
+  { href: "/perks", label: "Perks" },
   { href: "/guides", label: "Guides" },
   { href: "/pricing", label: "Pricing" },
 ];
 
-const ALERTS_ITEM = { href: "/alerts", label: "Flight alerts" } as const;
+const ALERTS_ITEM = { href: "/alerts", label: "Alerts" } as const;
 
 /**
  * `viewer` arrives as a prop from the root layout: this is a client component
