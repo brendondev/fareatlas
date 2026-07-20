@@ -15,11 +15,14 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           echo "Target: ${APP_URL}/api/cron/award-alerts"
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+          BODY=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
             --get \
             --data-urlencode "secret=${CRON_SECRET}" \
             "${APP_URL}/api/cron/award-alerts")
+          STATUS=$(echo "$BODY" | grep "HTTP_STATUS:" | cut -d: -f2)
+          JSON=$(echo "$BODY" | grep -v "HTTP_STATUS:")
           echo "HTTP ${STATUS}"
+          echo "Response: ${JSON}"
           if [ "${STATUS}" -lt 200 ] || [ "${STATUS}" -ge 300 ]; then
             echo "Cron returned HTTP ${STATUS} - failing job"
             exit 1
