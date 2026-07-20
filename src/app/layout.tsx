@@ -9,11 +9,10 @@ import "./globals.css";
 /**
  * Fraunces for display, Inter for everything else.
  *
- * The reflex "premium serif" is a Didone (Playfair, Cormorant), and it is the
- * wrong call on a near-black page: high-contrast hairlines get eaten by the
- * surrounding field and shimmer on scroll. Fraunces is a variable soft-serif
- * with a real optical-size axis and moderate stroke contrast, so it survives
- * on obsidian. Headings and figures only — never body copy.
+ * Fraunces is a variable soft-serif with a real optical-size axis and moderate
+ * stroke contrast — it reads warm next to the navy body copy without the icy
+ * hairlines of a Didone (Playfair, Cormorant). Headings and figures only,
+ * never body copy: on a light page long-form serif at 14–16px slows scanning.
  *
  * Inter carries the award table, where six columns of points and dates get
  * compared down the page. `tabular-nums` is applied in globals.css.
@@ -24,9 +23,9 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   // No `weight`: that would pin the font and next/font rejects `axes` on a
   // pinned variable font. Omitting it ships the full `wght` range.
-  // `opsz` is the axis that makes this work on a dark page; `SOFT` rounds the
-  // terminals, which sits with champagne rather than chrome. `WONK` is left
-  // out — it is pure flourish and costs payload.
+  // `opsz` gives the terminals room to breathe at display sizes; `SOFT`
+  // rounds them, which sits with the amber accent rather than chrome.
+  // `WONK` is left out — pure flourish and costs payload.
   axes: ["opsz", "SOFT"],
 });
 

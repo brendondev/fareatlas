@@ -44,14 +44,14 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
     : NAV;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(11,13,16,0.72)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(255,255,255,0.82)] backdrop-blur-xl">
       <div className="container-wide flex h-16 items-center justify-between gap-4">
         <Link className="flex items-center gap-2.5" href="/">
-          <span className="grid size-9 place-items-center rounded-xl bg-[var(--accent)] font-display text-sm font-bold text-[#0b0d10]">
+          <span className="grid size-9 place-items-center rounded-xl bg-[var(--accent)] font-display text-sm font-bold text-[var(--ink)]">
             FA
           </span>
           <span>
-            <span className="block font-display text-base font-semibold tracking-tight">
+            <span className="block font-display text-base font-bold tracking-tight text-ink">
               {SITE.name}
             </span>
             <span className="hidden text-[11px] font-medium text-[var(--muted)] sm:block">

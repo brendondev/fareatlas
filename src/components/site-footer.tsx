@@ -3,9 +3,9 @@ import { SITE } from "@/lib/content";
 
 export function SiteFooter() {
   return (
-    // Was a navy slab on a cream page. On obsidian that reads as a *lighter*
-    // block at the bottom, so the footer now recedes to the base colour and is
-    // separated by a hairline instead of by contrast.
+    // Footer recedes to a slightly cooler shade than the page (--background-deep
+    // is a hair darker than --base) so it reads as an anchor without stealing
+    // attention from the last content section above it.
     <footer className="mt-20 border-t border-[var(--line)] bg-[var(--background-deep)] text-[var(--ink)]">
       <div className="container-wide grid gap-10 py-12 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
         <div>

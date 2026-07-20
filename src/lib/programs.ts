@@ -9,7 +9,8 @@ export type ProgramMeta = {
   color: string;
   /**
    * Wash behind the program card. Must be translucent: these composite over
-   * the panel, and the opaque near-whites they replaced glowed on obsidian.
+   * the panel, and an opaque near-brand fill would fight the amber CTAs
+   * elsewhere on the same page.
    */
   accent: string;
 };

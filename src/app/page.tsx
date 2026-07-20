@@ -55,7 +55,7 @@ export default async function HomePage() {
             <div className="card overflow-hidden p-0 shadow-[var(--shadow)]">
               <div className="flex items-center justify-between border-b border-[var(--line)] bg-[var(--soft)] px-4 py-3">
                 <div className="flex gap-2">
-                  <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-[#0b0d10]">
+                  <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
                     Offers
                   </span>
                   <span className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
@@ -307,7 +307,7 @@ export default async function HomePage() {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {STEPS.map((step) => (
               <article className="card p-5" key={step.n}>
-                <span className="grid size-10 place-items-center rounded-full bg-[var(--accent)] font-display text-sm font-bold text-[#0b0d10]">
+                <span className="grid size-10 place-items-center rounded-full bg-[var(--accent)] font-display text-sm font-bold text-[var(--ink)]">
                   {step.n}
                 </span>
                 <h3 className="mt-4 text-lg font-bold">{step.title}</h3>
@@ -343,7 +343,7 @@ export default async function HomePage() {
             className="pointer-events-none absolute inset-x-0 top-0 h-48"
             style={{
               background:
-                "radial-gradient(620px 180px at 50% 0%, rgba(201, 169, 97, 0.18), transparent 70%)",
+                "radial-gradient(620px 180px at 50% 0%, rgba(245, 158, 11, 0.16), transparent 70%)",
             }}
           />
           <h2 className="relative font-display text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -378,9 +378,10 @@ function PricingCard({
   highlighted: boolean;
 }) {
   return (
-    // The highlighted plan used to invert to a dark slab on a light page. That
-    // trick has nowhere to go on obsidian, so emphasis comes from a champagne
-    // hairline and wash instead — and every text colour stays a single token.
+    // Emphasis on the highlighted plan comes from an amber hairline plus a
+    // top wash rather than inverting the whole card to dark: on a white page
+    // the inverted trick would over-shout, and every text colour stays a
+    // single token this way.
     <article
       className={`card relative overflow-hidden p-6 ${
         highlighted ? "border-[var(--accent)]/45 shadow-[var(--shadow)]" : ""
@@ -392,7 +393,7 @@ function PricingCard({
           className="pointer-events-none absolute inset-x-0 top-0 h-28"
           style={{
             background:
-              "linear-gradient(180deg, rgba(201, 169, 97, 0.12), transparent 100%)",
+              "linear-gradient(180deg, rgba(245, 158, 11, 0.10), transparent 100%)",
           }}
         />
       ) : null}

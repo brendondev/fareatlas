@@ -63,7 +63,7 @@ function PlanCard({
           className="pointer-events-none absolute inset-x-0 top-0 h-28"
           style={{
             background:
-              "linear-gradient(180deg, rgba(201, 169, 97, 0.12), transparent 100%)",
+              "linear-gradient(180deg, rgba(245, 158, 11, 0.10), transparent 100%)",
           }}
         />
       ) : null}
