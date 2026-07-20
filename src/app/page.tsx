@@ -55,7 +55,7 @@ export default async function HomePage() {
             <div className="card overflow-hidden p-0 shadow-[var(--shadow)]">
               <div className="flex items-center justify-between border-b border-[var(--line)] bg-[var(--soft)] px-4 py-3">
                 <div className="flex gap-2">
-                  <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
+                  <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white">
                     Offers
                   </span>
                   <span className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
@@ -307,7 +307,7 @@ export default async function HomePage() {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {STEPS.map((step) => (
               <article className="card p-5" key={step.n}>
-                <span className="grid size-10 place-items-center rounded-full bg-[var(--accent)] font-display text-sm font-bold text-[var(--ink)]">
+                <span className="grid size-10 place-items-center rounded-full bg-[var(--accent)] font-display text-sm font-bold text-white">
                   {step.n}
                 </span>
                 <h3 className="mt-4 text-lg font-bold">{step.title}</h3>
@@ -343,7 +343,7 @@ export default async function HomePage() {
             className="pointer-events-none absolute inset-x-0 top-0 h-48"
             style={{
               background:
-                "radial-gradient(620px 180px at 50% 0%, rgba(245, 158, 11, 0.16), transparent 70%)",
+                "radial-gradient(620px 180px at 50% 0%, rgba(79, 70, 229, 0.12), transparent 70%)",
             }}
           />
           <h2 className="relative font-display text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -393,7 +393,7 @@ function PricingCard({
           className="pointer-events-none absolute inset-x-0 top-0 h-28"
           style={{
             background:
-              "linear-gradient(180deg, rgba(245, 158, 11, 0.10), transparent 100%)",
+              "linear-gradient(180deg, rgba(79, 70, 229, 0.08), transparent 100%)",
           }}
         />
       ) : null}

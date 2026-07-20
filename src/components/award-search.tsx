@@ -319,7 +319,7 @@ export function AwardSearch({
                   aria-pressed={active}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${
                     active
-                      ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--ink)]"
+                      ? "border-[var(--accent)] bg-[var(--accent)] text-white"
                       : locked
                         ? "border-dashed border-[var(--accent)]/40 text-[var(--muted)]"
                         : "border-[var(--line)] bg-[var(--soft)] text-[var(--ink-soft)] hover:border-[var(--line-strong)]"
@@ -467,7 +467,7 @@ export function AwardSearch({
                                     <div className="flex flex-wrap gap-2 pt-1">
                                       {detail.bookingLinks.map((link) => (
                                         <a
-                                          className="rounded-full bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] hover:bg-[var(--accent-strong)]"
+                                          className="rounded-full bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--accent-strong)]"
                                           href={link.link}
                                           key={link.link}
                                           rel="noreferrer"

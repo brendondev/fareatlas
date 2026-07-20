@@ -50,7 +50,7 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
     <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(255,255,255,0.82)] backdrop-blur-xl">
       <div className="container-wide flex h-16 items-center justify-between gap-4">
         <Link className="flex items-center gap-2.5" href="/">
-          <span className="grid size-9 place-items-center rounded-xl bg-[var(--accent)] font-display text-sm font-bold text-[var(--ink)]">
+          <span className="grid size-9 place-items-center rounded-xl bg-[var(--accent)] font-display text-sm font-bold text-white">
             FA
           </span>
           <span>

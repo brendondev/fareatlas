@@ -36,7 +36,7 @@ export function OffersBrowser({
           <button
             className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
               program === "all"
-                ? "bg-[var(--accent)] text-[var(--ink)]"
+                ? "bg-[var(--accent)] text-white"
                 : "bg-[var(--soft)] text-[var(--muted)] ring-1 ring-[var(--line)] hover:text-[var(--ink)]"
             }`}
             onClick={() => setProgram("all")}

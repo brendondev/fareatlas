@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE } from "@/lib/content";
@@ -7,26 +7,22 @@ import { getViewer } from "@/lib/dal";
 import "./globals.css";
 
 /**
- * Fraunces for display, Inter for everything else.
+ * Plus Jakarta Sans for display, Inter for everything else.
  *
- * Fraunces is a variable soft-serif with a real optical-size axis and moderate
- * stroke contrast — it reads warm next to the navy body copy without the icy
- * hairlines of a Didone (Playfair, Cormorant). Headings and figures only,
- * never body copy: on a light page long-form serif at 14–16px slows scanning.
+ * One serif display face and two palette swaps later, the serif was the last
+ * artefact of the old identity — geometric-humanist headings over Inter body
+ * is the coherent voice for a single-brand-colour SaaS. Jakarta stays out of
+ * body copy: at 14–16px its wide apertures cost line-length.
  *
  * Inter carries the award table, where six columns of points and dates get
  * compared down the page. `tabular-nums` is applied in globals.css.
  */
-const fraunces = Fraunces({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-fraunces",
-  // No `weight`: that would pin the font and next/font rejects `axes` on a
-  // pinned variable font. Omitting it ships the full `wght` range.
-  // `opsz` gives the terminals room to breathe at display sizes; `SOFT`
-  // rounds them, which sits with the amber accent rather than chrome.
-  // `WONK` is left out — pure flourish and costs payload.
-  axes: ["opsz", "SOFT"],
+  variable: "--font-jakarta",
+  // No `weight`: omitting it ships the full variable `wght` range, and
+  // .section-title picks 700 from it.
 });
 
 const inter = Inter({
@@ -62,7 +58,7 @@ export default async function RootLayout({
     // longer overrides `scroll-behavior: smooth` during navigation, so without
     // it every route change animates the scroll.
     <html
-      className={`${fraunces.variable} ${inter.variable}`}
+      className={`${jakarta.variable} ${inter.variable}`}
       data-scroll-behavior="smooth"
       lang="en-AU"
     >
