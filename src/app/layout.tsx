@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE } from "@/lib/content";
 import { getViewer } from "@/lib/dal";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 /**
@@ -31,12 +32,37 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const title = {
+  default: `${SITE.name} — ${SITE.tagline}`,
+  template: `%s · ${SITE.name}`,
+};
+
 export const metadata: Metadata = {
-  title: {
-    default: `${SITE.name} — ${SITE.tagline}`,
-    template: `%s · ${SITE.name}`,
-  },
+  metadataBase: new URL(siteUrl()),
+  title,
   description: SITE.description,
+  keywords: [
+    "frequent flyer points",
+    "award flights",
+    "points vs cash",
+    "Qantas points",
+    "Velocity points",
+    "business class award seats",
+    "Australian loyalty programs",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "en_AU",
+    url: "/",
+    siteName: SITE.name,
+    title: title.default,
+    description: SITE.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: title.default,
+    description: SITE.description,
+  },
 };
 
 export default async function RootLayout({
