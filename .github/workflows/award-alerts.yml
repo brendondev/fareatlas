@@ -1,0 +1,20 @@
+name: Award Alerts Cron
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # every hour
+  workflow_dispatch:        # manual trigger via GitHub UI
+
+jobs:
+  run-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger award-alerts
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.APP_URL }}/api/cron/award-alerts?secret=${{ secrets.CRON_SECRET }}")
+          echo "HTTP $STATUS"
+          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 300 ]; then
+            echo "Cron returned HTTP $STATUS — failing job"
+            exit 1
+          fi
