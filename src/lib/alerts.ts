@@ -84,8 +84,10 @@ function groupKey(p: CachedSearchParams): string {
 
 export async function runAwardAlerts(options?: {
   limit?: number;
+  force?: boolean;
 }): Promise<AlertsSummary> {
   const limit = options?.limit ?? DEFAULT_BATCH;
+  const force = options?.force ?? false;
   const now = new Date();
   const dueBefore = new Date(now.getTime() - CHECK_THRESHOLD_MIN * 60 * 1000);
   const today = awardCacheDayKey();
@@ -96,7 +98,7 @@ export async function runAwardAlerts(options?: {
     where: {
       status: "active",
       userId: { not: null },
-      OR: [{ lastCheckedAt: null }, { lastCheckedAt: { lt: dueBefore } }],
+      ...(force ? {} : { OR: [{ lastCheckedAt: null }, { lastCheckedAt: { lt: dueBefore } }] }),
     },
     orderBy: { lastCheckedAt: "asc" }, // nulls first in Postgres asc
     take: limit,
@@ -132,7 +134,7 @@ export async function runAwardAlerts(options?: {
     const raw: CachedSearchParams = {
       originAirport: watch.origin,
       destinationAirport: watch.destination,
-      startDate: iso(watch.startDate) ?? today,
+      startDate: iso(watch.startDate),
       endDate: iso(watch.endDate),
       cabins: watch.cabins,
       sources: watch.programs ?? undefined,

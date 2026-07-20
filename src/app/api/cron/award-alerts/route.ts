@@ -36,9 +36,10 @@ export async function GET(request: NextRequest) {
 
   const limitParam = Number(request.nextUrl.searchParams.get("limit"));
   const limit = Number.isFinite(limitParam) && limitParam > 0 ? limitParam : undefined;
+  const force = request.nextUrl.searchParams.get("force") === "true";
 
   try {
-    const summary = await runAwardAlerts({ limit });
+    const summary = await runAwardAlerts({ limit, force });
     return NextResponse.json(summary);
   } catch (error) {
     console.error("[cron/award-alerts]", error);
