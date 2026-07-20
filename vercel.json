@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/award-cache?mode=purge",
       "schedule": "5 14 * * *"
+    },
+    {
+      "path": "/api/cron/award-alerts",
+      "schedule": "0 * * * *"
     }
   ]
 }
