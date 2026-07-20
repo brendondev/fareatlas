@@ -17,9 +17,13 @@ const EARN = [
 
 const NAV = [
   { href: "/flights", label: "Flights" },
+  // Alerts is inserted between Flights and Guides only when auth is switched
+  // on — it's account-gated and would frustrate an anonymous click.
   { href: "/guides", label: "Guides" },
   { href: "/pricing", label: "Pricing" },
 ];
+
+const ALERTS_ITEM = { href: "/alerts", label: "Flight alerts" } as const;
 
 /**
  * `viewer` arrives as a prop from the root layout: this is a client component
@@ -34,6 +38,10 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
   const earnActive = EARN.some(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
   );
+  // Inject Alerts right after Flights when auth is switched on.
+  const nav = authConfigured
+    ? [NAV[0]!, ALERTS_ITEM, ...NAV.slice(1)]
+    : NAV;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(11,13,16,0.72)] backdrop-blur-xl">
@@ -97,7 +105,7 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
             ) : null}
           </div>
 
-          {NAV.map((item) => {
+          {nav.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
@@ -176,7 +184,7 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
               </Link>
             ))}
             <div className="my-1 border-t border-[var(--line)]" />
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <Link
                 className="rounded-xl px-3 py-3 text-sm font-medium hover:bg-[var(--soft)]"
                 href={item.href}

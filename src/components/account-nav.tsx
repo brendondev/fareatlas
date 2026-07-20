@@ -3,12 +3,11 @@ import Link from "next/link";
 export function AccountNav({
   active,
 }: {
-  active: "overview" | "programs" | "watches";
+  active: "overview" | "programs";
 }) {
   const items = [
     { href: "/account", label: "Overview", key: "overview" },
     { href: "/account/programs", label: "Programs", key: "programs" },
-    { href: "/account/watches", label: "Watched routes", key: "watches" },
   ] as const;
 
   return (

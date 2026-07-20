@@ -83,8 +83,8 @@ export default async function AccountPage() {
           )}
 
           <div className="mt-5 flex flex-wrap gap-2">
-            <Link className="btn btn-secondary h-9" href="/account/watches">
-              Manage routes
+            <Link className="btn btn-secondary h-9" href="/alerts">
+              Manage alerts
             </Link>
             <Link className="btn btn-secondary h-9" href="/account/programs">
               Your programs

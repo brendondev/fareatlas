@@ -46,7 +46,7 @@ export async function unfollowProgram(formData: FormData): Promise<void> {
 }
 
 export async function deleteWatch(formData: FormData): Promise<void> {
-  const { user } = await requireUser("/account/watches");
+  const { user } = await requireUser("/alerts");
   const watchId = String(formData.get("watchId") ?? "");
   if (!watchId) return;
 
@@ -59,6 +59,6 @@ export async function deleteWatch(formData: FormData): Promise<void> {
     console.error("[account] deleteWatch", error);
   }
 
-  revalidatePath("/account/watches");
+  revalidatePath("/alerts");
   revalidatePath("/account");
 }
