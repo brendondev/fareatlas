@@ -151,6 +151,7 @@ export async function runAwardAlerts(options?: {
   }
 
   // One live search per group (refresh: fresh data + rewarms the day cache).
+  // Falls back to cached payload if the live API call fails (e.g. key not set).
   for (const group of groups.values()) {
     try {
       const res = await searchAwardsCached(group.params, { refresh: true });
@@ -159,9 +160,18 @@ export async function runAwardAlerts(options?: {
         mapSearchResults(res.response.data ?? []),
         group.tier,
       );
-    } catch (error) {
-      console.error("[alerts] search failed", group.params, error);
-      group.results = [];
+    } catch (liveError) {
+      console.error("[alerts] live search failed, falling back to cache", group.params, liveError);
+      try {
+        const cached = await searchAwardsCached(group.params);
+        group.results = filterResultsForTier(
+          mapSearchResults(cached.response.data ?? []),
+          group.tier,
+        );
+      } catch (cacheError) {
+        console.error("[alerts] cache also failed", group.params, cacheError);
+        group.results = [];
+      }
     }
   }
 
