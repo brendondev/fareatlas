@@ -97,7 +97,7 @@ export default async function RootLayout({
       <body>
         <SiteHeader dict={dict} locale={locale} viewer={viewer} />
         {children}
-        <SiteFooter dict={dict.footer} />
+        <SiteFooter dict={dict} />
       </body>
     </html>
   );

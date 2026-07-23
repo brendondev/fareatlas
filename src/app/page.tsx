@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { OfferCard } from "@/components/offer-card";
-import { CABINS, FEATURES, PRICING, SITE, STEPS } from "@/lib/content";
+import { getDictionary, type Dictionary } from "@/lib/i18n";
 import { getCashFares, getOffers } from "@/lib/offers";
 import { PROGRAMS } from "@/lib/programs";
 
@@ -11,10 +11,12 @@ const money = new Intl.NumberFormat("en-AU", {
 });
 
 export default async function HomePage() {
-  const [{ offers }, { fares }] = await Promise.all([
+  const [{ offers }, { fares }, dict] = await Promise.all([
     getOffers({ take: 4 }),
     getCashFares(3),
+    getDictionary(),
   ]);
+  const t = dict.home;
 
   return (
     <main>
@@ -22,32 +24,30 @@ export default async function HomePage() {
       <section className="hero-grid relative overflow-hidden border-b border-[var(--line)]">
         <div className="container-wide grid items-center gap-12 py-16 lg:grid-cols-[1.15fr_0.85fr] lg:py-20">
           <div>
-            <span className="pill text-[var(--accent)]">
-              Australia-first · Points + cash
-            </span>
+            <span className="pill text-[var(--accent)]">{t.hero.badge}</span>
             <h1 className="mt-5 font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-[3.35rem] lg:leading-[1.08]">
-              Points and reward flights —{" "}
-              <span className="gradient-text">all in one place.</span>
+              {t.hero.titleLead}{" "}
+              <span className="gradient-text">{t.hero.titleAccent}</span>
             </h1>
             <p className="section-lead mt-5">
-              {SITE.description} Unlike points-only apps, FareAtlas also tracks{" "}
+              {dict.common.siteDescription} {t.hero.leadA}{" "}
               <strong className="font-semibold text-[var(--ink)]">
-                cash fares
+                {t.hero.leadCash}
               </strong>{" "}
-              so you know when dollars beat points.
+              {t.hero.leadB}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link className="btn btn-accent" href="/offers">
-                Start earning smarter
+                {t.hero.ctaPrimary}
               </Link>
               <Link className="btn btn-secondary" href="/flights">
-                Search award seats
+                {t.hero.ctaSecondary}
               </Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--muted)]">
-              <span>✓ Free to start</span>
-              <span>✓ Cancel anytime</span>
-              <span>✓ 4 AU programs, one app</span>
+              <span>✓ {t.hero.trust1}</span>
+              <span>✓ {t.hero.trust2}</span>
+              <span>✓ {t.hero.trust3}</span>
             </div>
           </div>
 
@@ -56,13 +56,15 @@ export default async function HomePage() {
               <div className="flex items-center justify-between border-b border-[var(--line)] bg-[var(--soft)] px-4 py-3">
                 <div className="flex gap-2">
                   <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white">
-                    Offers
+                    {t.hero.previewOffers}
                   </span>
                   <span className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                    Flights
+                    {t.hero.previewFlights}
                   </span>
                 </div>
-                <span className="text-xs text-[var(--muted)]">Live preview</span>
+                <span className="text-xs text-[var(--muted)]">
+                  {t.hero.previewLive}
+                </span>
               </div>
               <div className="space-y-3 p-4">
                 {offers.slice(0, 3).map((offer) => (
@@ -79,7 +81,7 @@ export default async function HomePage() {
                       </span>
                       {offer.featured ? (
                         <span className="text-[10px] font-bold text-[var(--accent)]">
-                          ★ Featured
+                          ★ {t.hero.featured}
                         </span>
                       ) : null}
                     </div>
@@ -94,7 +96,9 @@ export default async function HomePage() {
               </div>
             </div>
             <div className="absolute -bottom-5 -left-4 hidden rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3 shadow-[var(--shadow)] sm:block">
-              <p className="text-xs text-[var(--muted)]">Cash alternative</p>
+              <p className="text-xs text-[var(--muted)]">
+                {t.hero.cashAlternative}
+              </p>
               <p className="mt-0.5 text-sm font-semibold tabular">
                 {fares[0]
                   ? `${fares[0].routeLabel} · ${money.format(fares[0].priceAud)}`
@@ -108,7 +112,7 @@ export default async function HomePage() {
       {/* Programs */}
       <section className="container-wide py-14">
         <p className="text-center text-sm font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
-          Australia&apos;s core loyalty programs
+          {t.programsEyebrow}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           {PROGRAMS.map((program) => (
@@ -123,11 +127,8 @@ export default async function HomePage() {
       {/* Program panels */}
       <section className="container-wide pb-16">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="section-title">All your programs, one dashboard</h2>
-          <p className="section-lead mx-auto">
-            Stop checking four sites. Follow the programs you use and act when
-            value appears — earn boosts or award seats.
-          </p>
+          <h2 className="section-title">{t.programsTitle}</h2>
+          <p className="section-lead mx-auto">{t.programsLead}</p>
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {PROGRAMS.map((program) => (
@@ -168,16 +169,11 @@ export default async function HomePage() {
       >
         <div className="container-wide">
           <div className="max-w-2xl">
-            <h2 className="section-title">
-              Everything you need to maximise points and flights
-            </h2>
-            <p className="section-lead">
-              One membership path for offers, award alerts tuned to your travel
-              windows, and cash comparisons when points are not the win.
-            </p>
+            <h2 className="section-title">{t.featuresTitle}</h2>
+            <p className="section-lead">{t.featuresLead}</p>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {FEATURES.map((feature) => (
+            {t.features.map((feature) => (
               <article className="card p-5" key={feature.title}>
                 <div className="grid size-10 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
                   <FeatureIcon name={feature.icon} />
@@ -196,14 +192,11 @@ export default async function HomePage() {
       <section className="container-wide py-16">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="section-title">Today&apos;s points opportunities</h2>
-            <p className="section-lead">
-              Fresh earn boosts across Qantas, Velocity, Everyday Rewards and
-              Flybuys.
-            </p>
+            <h2 className="section-title">{t.offersTitle}</h2>
+            <p className="section-lead">{t.offersLead}</p>
           </div>
           <Link className="btn btn-secondary" href="/offers">
-            View all offers
+            {t.offersCta}
           </Link>
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -219,15 +212,14 @@ export default async function HomePage() {
           <div className="card overflow-hidden p-0">
             <div className="border-b border-[var(--line)] bg-[var(--soft)] px-5 py-5">
               <h2 className="font-display text-2xl font-semibold tracking-tight">
-                Never miss an award seat
+                {t.awardTitle}
               </h2>
               <p className="mt-2 max-w-lg text-sm text-[var(--muted)]">
-                Monitor Economy through First. FareAtlas pairs award inventory
-                with cash alternatives so you redeem with intent.
+                {t.awardLead}
               </p>
             </div>
             <div className="grid gap-3 p-5 sm:grid-cols-2">
-              {CABINS.map((cabin) => (
+              {t.cabins.map((cabin) => (
                 <div
                   className="rounded-2xl bg-[var(--soft)] p-4"
                   key={cabin.code}
@@ -247,26 +239,24 @@ export default async function HomePage() {
                 which is honest and does the upsell better anyway. */}
             <div className="border-t border-[var(--line)] px-5 py-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-                Search live Seats.aero inventory
+                {t.cabinsSearchEyebrow}
               </p>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-                Economy is free forever. Premium Economy, Business and First
-                come with Premium.
+                {t.cabinsSearchBody}
               </p>
               <Link className="btn btn-accent mt-4" href="/flights">
-                Open award search
+                {t.awardCta}
               </Link>
             </div>
           </div>
 
           <div className="card p-5 sm:p-6">
-            <span className="pill text-[var(--accent)]">FareAtlas edge</span>
+            <span className="pill text-[var(--accent)]">{t.edgeBadge}</span>
             <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight">
-              Buy with $$ when it&apos;s smarter
+              {t.edgeTitle}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-              Offer and seat tracking, plus a cash fare watch — so you never
-              burn points on a route where the paid ticket was the better buy.
+              {t.edgeLead}
             </p>
             <div className="mt-5 space-y-3">
               {fares.map((fare) => (
@@ -299,13 +289,11 @@ export default async function HomePage() {
       <section className="border-y border-[var(--line)] bg-[var(--panel)]/60 py-16">
         <div className="container-wide">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="section-title">Start in about three minutes</h2>
-            <p className="section-lead mx-auto">
-              Set up once. Let FareAtlas watch offers and seats for you.
-            </p>
+            <h2 className="section-title">{t.stepsTitle}</h2>
+            <p className="section-lead mx-auto">{t.stepsLead}</p>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {STEPS.map((step) => (
+            {t.steps.map((step) => (
               <article className="card p-5" key={step.n}>
                 <span className="grid size-10 place-items-center rounded-full bg-[var(--accent)] font-display text-sm font-bold text-white">
                   {step.n}
@@ -323,21 +311,17 @@ export default async function HomePage() {
       {/* Pricing teaser */}
       <section className="container-wide py-16" id="pricing">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="section-title">Start free. Upgrade when ready.</h2>
-          <p className="section-lead mx-auto">
-            Browse offers free forever. Premium opens every cabin, the full
-            award window and email alerts; Pro adds unlimited routes and
-            priority alerts.
-          </p>
+          <h2 className="section-title">{t.pricingTeaserTitle}</h2>
+          <p className="section-lead mx-auto">{t.pricingTeaserLead}</p>
         </div>
         <div className="mx-auto mt-10 grid max-w-5xl gap-5 md:grid-cols-3">
-          <PricingCard plan={PRICING.free} highlighted={false} />
-          <PricingCard plan={PRICING.premium} highlighted />
-          <PricingCard plan={PRICING.pro} highlighted={false} />
+          <PricingCard plan={dict.plans.free} highlighted={false} />
+          <PricingCard plan={dict.plans.premium} highlighted />
+          <PricingCard plan={dict.plans.pro} highlighted={false} />
         </div>
         <div className="mt-8 text-center">
           <Link className="btn btn-accent" href="/pricing">
-            See full pricing
+            {t.pricingTeaserCta}
           </Link>
         </div>
       </section>
@@ -354,22 +338,21 @@ export default async function HomePage() {
             }}
           />
           <h2 className="relative font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Stop leaving points on the table
+            {t.finalTitle}
           </h2>
           <p className="relative mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[var(--muted)] sm:text-base">
-            Join FareAtlas free — track boosts, hunt award seats, and compare
-            cash so every trip decision is sharper.
+            {t.finalLead}
           </p>
           <div className="relative mt-8 flex flex-wrap justify-center gap-3">
             <Link className="btn btn-accent" href="/offers">
-              Start free
+              {t.finalCtaPrimary}
             </Link>
             <Link className="btn btn-secondary" href="/flights">
-              Search flights
+              {t.finalCtaSecondary}
             </Link>
           </div>
           <p className="relative mt-4 text-xs text-[var(--muted)]">
-            Free to start. No credit card. Premium waitlist open.
+            {t.finalNote}
           </p>
         </div>
       </section>
@@ -381,7 +364,7 @@ function PricingCard({
   plan,
   highlighted,
 }: {
-  plan: (typeof PRICING)[keyof typeof PRICING];
+  plan: Dictionary["plans"][keyof Dictionary["plans"]];
   highlighted: boolean;
 }) {
   return (
