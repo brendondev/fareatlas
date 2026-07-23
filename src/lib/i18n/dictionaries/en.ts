@@ -322,4 +322,54 @@ export const en = {
       saveFailed: "Could not save alert. Try again.",
     },
   },
+  perks: {
+    pill: "Premium perks",
+    title: "What Premium unlocks",
+    lead: "Free covers Economy and the offers side of FareAtlas forever. Premium is for the flights you actually want — the ones near the front of the plane.",
+    heroPerks: [
+      {
+        title: "Every cabin, not just Economy",
+        body: "Premium Economy, Business and First award search across every mileage program Seats.aero exposes — the routes Free only teases.",
+      },
+      {
+        title: "The full 12-month award window",
+        body: "Search a year out instead of 90 days, so you catch premium inventory the moment it opens instead of missing the sweet spot.",
+      },
+      {
+        title: "More alerts, every cabin",
+        body: "Lift the three-alert cap to 15 routes on Premium — or go unlimited on Pro — across every cabin your points can reach, with email when seats open.",
+      },
+    ],
+    everythingHeading: "Everything Premium unlocks",
+    yourAccount: "Your account",
+    youreOnTemplate: "You're on {plan}",
+    activePro: "Every cabin, the full year, unlimited alerts and priority checks. Search away — Seats.aero calls are on us.",
+    activePremium: "Every cabin, the full year and email alerts on your routes. Search away — Seats.aero calls are on us.",
+    openSearch: "Open award search",
+    getStarted: "Get started",
+    pickPlan: "Pick your plan",
+    pickPlanBody: "Premium opens every cabin, the full year and email alerts. Pro adds unlimited routes and priority alerts. The offers side stays free forever.",
+    seePlans: "See plans",
+    startFreeNote: "Start free — no card required.",
+    whyUpgrade: "Why upgrade at all?",
+    useCases: [
+      {
+        title: "You're planning a Business-class trip in ~9 months",
+        body: "Free stops at 90 days and Economy only. Premium sees J inventory the day it opens across the full year, so you actually catch the good release windows.",
+      },
+      {
+        title: "You fly the same city pair often",
+        body: "Free lets you alert on three routes. If you're a Melbourne–Perth commuter with a Bali holiday and a Tokyo trip in mind, that's already gone.",
+      },
+      {
+        title: "You transfer to a partner program",
+        body: "Aeroplan, Virgin Atlantic and Singapore KrisFlyer often price the same seat differently. Premium shows all of them so you route through the cheapest.",
+      },
+      {
+        title: "You want the offers side for free",
+        body: "Offers, wine, gift cards, cards and cash-fare snapshots stay free forever. Premium is about the flight search — nothing on the earn side moves behind a paywall.",
+      },
+    ],
+    footerNote: "You can cancel anytime from the billing portal. The offers side of FareAtlas stays free forever.",
+  },
 } satisfies Dictionary;

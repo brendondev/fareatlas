@@ -323,4 +323,54 @@ export const es = {
       saveFailed: "No se pudo guardar la alerta. Inténtalo de nuevo.",
     },
   },
+  perks: {
+    pill: "Beneficios Premium",
+    title: "Qué desbloquea Premium",
+    lead: "Free cubre Económica y el lado de ofertas de FareAtlas para siempre. Premium es para los vuelos que de verdad quieres — los de adelante del avión.",
+    heroPerks: [
+      {
+        title: "Todas las cabinas, no solo Económica",
+        body: "Búsqueda de premios en Económica Premium, Ejecutiva y First en todos los programas de millas que expone Seats.aero — las rutas que Free solo insinúa.",
+      },
+      {
+        title: "La ventana completa de 12 meses",
+        body: "Busca con un año de anticipación en vez de 90 días, para atrapar disponibilidad premium apenas abre en vez de perder el momento.",
+      },
+      {
+        title: "Más alertas, todas las cabinas",
+        body: "Sube el límite de 3 alertas a 15 rutas en Premium — o ilimitado en Pro — en todas las cabinas que alcanzan tus puntos, con email cuando abren asientos.",
+      },
+    ],
+    everythingHeading: "Todo lo que desbloquea Premium",
+    yourAccount: "Tu cuenta",
+    youreOnTemplate: "Estás en {plan}",
+    activePro: "Todas las cabinas, el año entero, alertas ilimitadas y revisiones prioritarias. Busca sin límites — las llamadas a Seats.aero corren por nuestra cuenta.",
+    activePremium: "Todas las cabinas, el año entero y alertas por email en tus rutas. Busca sin límites — las llamadas a Seats.aero corren por nuestra cuenta.",
+    openSearch: "Abrir búsqueda de premios",
+    getStarted: "Empieza",
+    pickPlan: "Elige tu plan",
+    pickPlanBody: "Premium abre todas las cabinas, el año entero y alertas por email. Pro añade rutas ilimitadas y alertas prioritarias. El lado de ofertas queda gratis para siempre.",
+    seePlans: "Ver planes",
+    startFreeNote: "Empieza gratis — sin tarjeta.",
+    whyUpgrade: "¿Por qué mejorar?",
+    useCases: [
+      {
+        title: "Planeas un viaje en Ejecutiva en ~9 meses",
+        body: "Free se detiene en 90 días y solo Económica. Premium ve disponibilidad de Ejecutiva el día que abre, todo el año, así atrapas las buenas ventanas de liberación.",
+      },
+      {
+        title: "Vuelas el mismo par de ciudades seguido",
+        body: "Free te deja alertar en tres rutas. Si haces Melbourne–Perth cada semana y además quieres Bali y Tokio, ya se acabó.",
+      },
+      {
+        title: "Transfieres a un programa socio",
+        body: "Aeroplan, Virgin Atlantic y Singapore KrisFlyer suelen cobrar el mismo asiento de forma distinta. Premium los muestra todos para que rutees por el más barato.",
+      },
+      {
+        title: "Quieres el lado de ofertas gratis",
+        body: "Ofertas, vinos, gift cards, tarjetas y snapshots de tarifa en efectivo quedan gratis para siempre. Premium es sobre la búsqueda de vuelos — nada del lado de acumular pasa a un muro de pago.",
+      },
+    ],
+    footerNote: "Puedes cancelar cuando quieras desde el portal de facturación. El lado de ofertas de FareAtlas queda gratis para siempre.",
+  },
 } satisfies Dictionary;
