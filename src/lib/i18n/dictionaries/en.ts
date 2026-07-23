@@ -56,6 +56,13 @@ export const en = {
   common: {
     siteDescription:
       "Track Australian loyalty offers, award seat availability, and cash fares — so you know when to burn points and when to pay dollars.",
+    cabins: {
+      economy: "Economy",
+      premium: "Premium Economy",
+      business: "Business",
+      first: "First",
+    },
+    unlimited: "Unlimited",
   },
   plans: {
     free: {
@@ -251,5 +258,68 @@ export const en = {
     comingSoon: "Coming soon",
     waitlistNote:
       "Billing isn't switched on for this deployment yet. Route alerts already work — we watch your routes and flag seats as they open. Join the list and we'll email you the moment paid plans open.",
+  },
+  alerts: {
+    title: "Flight alerts",
+    countTemplate: "{count} of {limit} on the {plan} plan.",
+    newAlert: "New alert",
+    createFirst: "Create your first alert",
+    yourAlerts: "Your alerts",
+    seatsFound: "Seats found",
+    checkedTemplate: "Checked {time} · no seats yet",
+    notCheckedYet: "Not checked yet",
+    remove: "Remove",
+    emptyTitle: "No flight alerts yet",
+    emptyBody:
+      "You won't get any flight notifications until you create an alert. Add one to track award seats on a specific route for a fixed date, a date range, or any date.",
+    atLimitTemplate: "You're at the {limit}-alert limit on your plan.",
+    atLimitCtaPro: "Go Pro (unlimited)",
+    atLimitCtaUpgrade: "See plans",
+    footerPaid:
+      "We check your alerts in the background and email you when seats open — every cabin on your plan. Availability moves fast, so confirm with the program before you rely on it.",
+    footerFree:
+      "We check your alerts in the background and flag seats here as they open — Economy on Free. Email alerts on your routes come with Premium and Pro. Availability moves fast, so confirm with the program before you rely on it.",
+    emailOffNote:
+      " Email delivery isn't switched on yet, so alerts show here rather than in your inbox for now.",
+    anyDate: "Any date",
+    from: "From",
+    until: "Until",
+    timeJustNow: "just now",
+    timeMinAgo: "{n} min ago",
+    timeHoursAgo: "{n}h ago",
+    timeDaysAgo: "{n}d ago",
+    modal: {
+      title: "New flight alert",
+      close: "Close",
+      cancel: "Cancel",
+      saving: "Saving…",
+      create: "Create alert",
+      routeLegend: "Route",
+      origin: "Origin",
+      destination: "Destination",
+      routeHint: "Options are limited to routes the app monitors.",
+      cabinLegend: "Cabin classes",
+      dateLegend: "Dates",
+      dateAny: "Any date",
+      dateFixed: "Fixed date",
+      dateRange: "Date range",
+      anyHint: "Notify me whenever award seats open on any date.",
+      dateLabel: "Date",
+      fromLabel: "From",
+      toLabel: "To",
+    },
+    errors: {
+      chooseRoute: "Choose both an origin and destination.",
+      sameRoute: "Origin and destination must differ.",
+      routeNotMonitored: "That route isn't in the monitored list yet.",
+      pickCabin: "Pick at least one cabin.",
+      validDate: "Choose a valid date.",
+      startEnd: "Choose both a start and end date.",
+      startBeforeEnd: "Start date must be on or before end date.",
+      limitTemplate: "Your plan covers {limit} alerts. Remove one, or {upsell}.",
+      upsellFree: "go Premium for more, or Pro for unlimited",
+      upsellPaid: "go Pro for unlimited",
+      saveFailed: "Could not save alert. Try again.",
+    },
   },
 } satisfies Dictionary;

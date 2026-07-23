@@ -8,42 +8,36 @@ import { requireUser } from "@/lib/dal";
 import { prisma } from "@/lib/db";
 import { isEmailConfigured } from "@/lib/email";
 import { entitlementsFor } from "@/lib/entitlements";
+import { getDictionary, getLocale, type Dictionary } from "@/lib/i18n";
+import { LOCALE_HTML_LANG } from "@/lib/i18n/config";
 
 export const metadata: Metadata = { title: "Flight alerts" };
 export const dynamic = "force-dynamic";
 
-const CABIN_LABEL: Record<string, string> = {
-  economy: "Economy",
-  premium: "Premium Economy",
-  business: "Business",
-  first: "First",
-};
+type AlertsDict = Dictionary["alerts"];
 
-const dateFormatter = new Intl.DateTimeFormat("en-AU", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-function relativeTime(date: Date): string {
+function relativeTime(date: Date, t: AlertsDict): string {
   const mins = Math.round((Date.now() - date.getTime()) / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} min ago`;
+  if (mins < 1) return t.timeJustNow;
+  if (mins < 60) return t.timeMinAgo.replace("{n}", String(mins));
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
+  if (hours < 24) return t.timeHoursAgo.replace("{n}", String(hours));
+  return t.timeDaysAgo.replace("{n}", String(Math.round(hours / 24)));
 }
 
-function windowLabel(startDate: Date | null, endDate: Date | null): string {
-  if (!startDate && !endDate) return "Any date";
+function windowLabel(
+  startDate: Date | null,
+  endDate: Date | null,
+  t: AlertsDict,
+  fmt: Intl.DateTimeFormat,
+): string {
+  if (!startDate && !endDate) return t.anyDate;
   if (startDate && endDate) {
-    if (startDate.getTime() === endDate.getTime()) {
-      return dateFormatter.format(startDate);
-    }
-    return `${dateFormatter.format(startDate)} → ${dateFormatter.format(endDate)}`;
+    if (startDate.getTime() === endDate.getTime()) return fmt.format(startDate);
+    return `${fmt.format(startDate)} → ${fmt.format(endDate)}`;
   }
-  if (startDate) return `From ${dateFormatter.format(startDate)}`;
-  return `Until ${dateFormatter.format(endDate!)}`;
+  if (startDate) return `${t.from} ${fmt.format(startDate)}`;
+  return `${t.until} ${fmt.format(endDate!)}`;
 }
 
 function airportLabel(iata: string): string {
@@ -54,6 +48,15 @@ function airportLabel(iata: string): string {
 export default async function AlertsPage() {
   if (!isAuthConfigured()) notFound();
   const { user, tier } = await requireUser("/alerts");
+  const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
+  const t = dict.alerts;
+  const cabinLabels = dict.common.cabins;
+
+  const dateFormatter = new Intl.DateTimeFormat(LOCALE_HTML_LANG[locale], {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
   const alerts = await prisma.awardWatch
     .findMany({
@@ -63,30 +66,35 @@ export default async function AlertsPage() {
     .catch(() => []);
 
   const limit = entitlementsFor(tier).maxWatches;
-  const limitLabel = Number.isFinite(limit) ? `${limit}` : "Unlimited";
+  const limitLabel = Number.isFinite(limit)
+    ? `${limit}`
+    : dict.common.unlimited;
   const atLimit = Number.isFinite(limit) && alerts.length >= limit;
+  const planLabel = tier === "pro" ? "Pro" : tier === "premium" ? "Premium" : "Free";
 
   return (
     <main className="container-page py-12 sm:py-16">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="pill text-[var(--accent)]">
-            <BellIcon /> Flight alerts
+            <BellIcon /> {t.title}
           </span>
-          <h1 className="section-title mt-4">Flight alerts</h1>
+          <h1 className="section-title mt-4">{t.title}</h1>
           <p className="section-lead">
-            Manage the routes and dates you want award-seat alerts for.{" "}
-            {alerts.length} of {limitLabel} on the{" "}
-            {tier === "pro" ? "Pro" : tier === "premium" ? "Premium" : "Free"}{" "}
-            plan.
+            {t.countTemplate
+              .replace("{count}", String(alerts.length))
+              .replace("{limit}", limitLabel)
+              .replace("{plan}", planLabel)}
           </p>
         </div>
-        {!atLimit ? <NewAlertModal label="New alert" /> : null}
+        {!atLimit ? (
+          <NewAlertModal cabins={cabinLabels} dict={t.modal} label={t.newAlert} />
+        ) : null}
       </div>
 
       <section className="mt-10">
         <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--muted)]">
-          <PlaneIcon /> Your alerts
+          <PlaneIcon /> {t.yourAlerts}
         </div>
 
         {alerts.length ? (
@@ -103,27 +111,35 @@ export default async function AlertsPage() {
                   <p className="mt-1 text-xs text-[var(--muted)]">
                     {alert.cabins
                       .split(",")
-                      .map((c) => CABIN_LABEL[c.trim()] ?? c.trim())
+                      .map(
+                        (c) =>
+                          cabinLabels[
+                            c.trim() as keyof typeof cabinLabels
+                          ] ?? c.trim(),
+                      )
                       .join(" · ")}
                     {" · "}
-                    {windowLabel(alert.startDate, alert.endDate)}
+                    {windowLabel(alert.startDate, alert.endDate, t, dateFormatter)}
                   </p>
                   {alert.lastHitSummary ? (
                     <p className="mt-1.5 text-xs font-semibold text-[var(--accent)]">
-                      ✈ Seats found · {alert.lastHitSummary}
+                      ✈ {t.seatsFound} · {alert.lastHitSummary}
                     </p>
                   ) : (
                     <p className="mt-1.5 text-xs text-[var(--muted)]">
                       {alert.lastCheckedAt
-                        ? `Checked ${relativeTime(alert.lastCheckedAt)} · no seats yet`
-                        : "Not checked yet"}
+                        ? t.checkedTemplate.replace(
+                            "{time}",
+                            relativeTime(alert.lastCheckedAt, t),
+                          )
+                        : t.notCheckedYet}
                     </p>
                   )}
                 </div>
                 <form action={deleteAlert}>
                   <input name="alertId" type="hidden" value={alert.id} />
                   <button className="btn btn-secondary h-9" type="submit">
-                    Remove
+                    {t.remove}
                   </button>
                 </form>
               </li>
@@ -134,16 +150,14 @@ export default async function AlertsPage() {
             <div className="grid size-14 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]">
               <PlaneIcon size={26} />
             </div>
-            <p className="font-display text-lg font-semibold">
-              No flight alerts yet
-            </p>
-            <p className="max-w-md text-sm text-[var(--muted)]">
-              You won&apos;t get any flight notifications until you create an
-              alert. Add one to track award seats on a specific route for a
-              fixed date, a date range, or any date.
-            </p>
+            <p className="font-display text-lg font-semibold">{t.emptyTitle}</p>
+            <p className="max-w-md text-sm text-[var(--muted)]">{t.emptyBody}</p>
             <div className="mt-2">
-              <NewAlertModal label="Create your first alert" />
+              <NewAlertModal
+                cabins={cabinLabels}
+                dict={t.modal}
+                label={t.createFirst}
+              />
             </div>
           </div>
         )}
@@ -151,22 +165,16 @@ export default async function AlertsPage() {
 
       {atLimit ? (
         <p className="mt-6 rounded-xl border border-dashed border-[var(--line-strong)] p-4 text-center text-sm text-[var(--muted)]">
-          You&apos;re at the {limitLabel}-alert limit on{" "}
-          {tier === "premium" ? "Premium" : "Free"}. Remove one, or{" "}
+          {t.atLimitTemplate.replace("{limit}", limitLabel)}{" "}
           <a className="text-[var(--accent)] hover:underline" href="/pricing">
-            {tier === "premium" ? "go Pro" : "upgrade"}
-          </a>{" "}
-          for {tier === "premium" ? "unlimited" : "more"}.
+            {tier === "premium" ? t.atLimitCtaPro : t.atLimitCtaUpgrade}
+          </a>
         </p>
       ) : null}
 
       <p className="mt-6 text-xs leading-relaxed text-[var(--muted)]">
-        {entitlementsFor(tier).emailAlerts
-          ? "We check your alerts in the background and email you when seats open — every cabin on your plan. Availability moves fast, so confirm with the program before you rely on it."
-          : "We check your alerts in the background and flag seats here as they open — Economy on Free. Email alerts on your routes come with Premium and Pro. Availability moves fast, so confirm with the program before you rely on it."}
-        {isEmailConfigured()
-          ? ""
-          : " Email delivery isn't switched on yet, so alerts show here rather than in your inbox for now."}
+        {entitlementsFor(tier).emailAlerts ? t.footerPaid : t.footerFree}
+        {isEmailConfigured() ? "" : t.emailOffNote}
       </p>
     </main>
   );

@@ -6,6 +6,7 @@ import { isKnownIata } from "@/lib/airports";
 import { requireUser } from "@/lib/dal";
 import { prisma } from "@/lib/db";
 import { ALL_CABINS, entitlementsFor } from "@/lib/entitlements";
+import { getDictionary } from "@/lib/i18n";
 
 /**
  * Actions backing the /alerts page.
@@ -46,6 +47,7 @@ export async function createAlert(
   formData: FormData,
 ): Promise<CreateAlertState> {
   const { user, tier } = await requireUser("/alerts");
+  const t = (await getDictionary()).alerts.errors;
 
   const origin = String(formData.get("origin") ?? "").toUpperCase().trim();
   const destination = String(formData.get("destination") ?? "")
@@ -53,13 +55,13 @@ export async function createAlert(
     .trim();
 
   if (!IATA.test(origin) || !IATA.test(destination)) {
-    return { ok: false, error: "Choose both an origin and destination." };
+    return { ok: false, error: t.chooseRoute };
   }
   if (origin === destination) {
-    return { ok: false, error: "Origin and destination must differ." };
+    return { ok: false, error: t.sameRoute };
   }
   if (!isKnownIata(origin) || !isKnownIata(destination)) {
-    return { ok: false, error: "That route isn't in the monitored list yet." };
+    return { ok: false, error: t.routeNotMonitored };
   }
 
   // Multiple <input name="cabin" value="economy"> submissions; keep the order
@@ -74,7 +76,7 @@ export async function createAlert(
   const cabins = rawCabins.filter((c) => (seen.has(c) ? false : seen.add(c)));
 
   if (!cabins.length) {
-    return { ok: false, error: "Pick at least one cabin." };
+    return { ok: false, error: t.pickCabin };
   }
 
   const mode = String(formData.get("dateMode") ?? "any");
@@ -84,7 +86,7 @@ export async function createAlert(
   if (mode === "fixed") {
     const parsed = parseDate(formData.get("date"));
     if (parsed === "invalid" || parsed === null) {
-      return { ok: false, error: "Choose a valid date." };
+      return { ok: false, error: t.validDate };
     }
     startDate = parsed;
     endDate = parsed;
@@ -92,10 +94,10 @@ export async function createAlert(
     const start = parseDate(formData.get("startDate"));
     const end = parseDate(formData.get("endDate"));
     if (start === "invalid" || end === "invalid" || !start || !end) {
-      return { ok: false, error: "Choose both a start and end date." };
+      return { ok: false, error: t.startEnd };
     }
     if (start.getTime() > end.getTime()) {
-      return { ok: false, error: "Start date must be on or before end date." };
+      return { ok: false, error: t.startBeforeEnd };
     }
     startDate = start;
     endDate = end;
@@ -108,13 +110,12 @@ export async function createAlert(
       where: { userId: user!.id, status: "active" },
     });
     if (existing >= limit) {
-      const upsell =
-        tier === "free"
-          ? "go Premium for more, or Pro for unlimited"
-          : "go Pro for unlimited";
+      const upsell = tier === "free" ? t.upsellFree : t.upsellPaid;
       return {
         ok: false,
-        error: `Your plan covers ${limit} alerts. Remove one, or ${upsell}.`,
+        error: t.limitTemplate
+          .replace("{limit}", String(limit))
+          .replace("{upsell}", upsell),
       };
     }
   }
@@ -135,7 +136,7 @@ export async function createAlert(
     });
   } catch (error) {
     console.error("[alerts] create failed", error);
-    return { ok: false, error: "Could not save alert. Try again." };
+    return { ok: false, error: t.saveFailed };
   }
 
   revalidatePath("/alerts");

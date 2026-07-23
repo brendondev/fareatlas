@@ -63,6 +63,13 @@ export const pt = {
   common: {
     siteDescription:
       "Acompanhe ofertas de fidelidade australianas, disponibilidade de assentos-prêmio e tarifas em dinheiro — pra você saber quando queimar pontos e quando pagar em dinheiro.",
+    cabins: {
+      economy: "Econômica",
+      premium: "Econômica Premium",
+      business: "Executiva",
+      first: "First",
+    },
+    unlimited: "Ilimitado",
   },
   plans: {
     free: {
@@ -258,5 +265,68 @@ export const pt = {
     comingSoon: "Em breve",
     waitlistNote:
       "A cobrança ainda não está ativa neste ambiente. Os alertas de rota já funcionam — vigiamos suas rotas e sinalizamos assentos assim que abrem. Entre na lista e avisamos assim que os planos pagos abrirem.",
+  },
+  alerts: {
+    title: "Alertas de voo",
+    countTemplate: "{count} de {limit} no plano {plan}.",
+    newAlert: "Novo alerta",
+    createFirst: "Criar seu primeiro alerta",
+    yourAlerts: "Seus alertas",
+    seatsFound: "Assentos encontrados",
+    checkedTemplate: "Checado {time} · nenhum assento ainda",
+    notCheckedYet: "Ainda não checado",
+    remove: "Remover",
+    emptyTitle: "Nenhum alerta de voo ainda",
+    emptyBody:
+      "Você não recebe nenhuma notificação de voo até criar um alerta. Adicione um pra acompanhar assentos-prêmio numa rota específica, numa data fixa, num período ou em qualquer data.",
+    atLimitTemplate: "Você atingiu o limite de {limit} alertas no seu plano.",
+    atLimitCtaPro: "Ir para o Pro (ilimitado)",
+    atLimitCtaUpgrade: "Ver planos",
+    footerPaid:
+      "Checamos seus alertas em segundo plano e te enviamos e-mail quando abrem assentos — todas as cabines do seu plano. A disponibilidade muda rápido, então confirme com o programa antes de contar com ela.",
+    footerFree:
+      "Checamos seus alertas em segundo plano e sinalizamos os assentos aqui assim que abrem — Econômica no Free. Alertas por e-mail nas suas rotas vêm com Premium e Pro. A disponibilidade muda rápido, então confirme com o programa antes de contar com ela.",
+    emailOffNote:
+      " A entrega de e-mail ainda não está ligada, então os alertas aparecem aqui em vez da sua caixa de entrada por enquanto.",
+    anyDate: "Qualquer data",
+    from: "A partir de",
+    until: "Até",
+    timeJustNow: "agora",
+    timeMinAgo: "{n} min atrás",
+    timeHoursAgo: "{n}h atrás",
+    timeDaysAgo: "{n}d atrás",
+    modal: {
+      title: "Novo alerta de voo",
+      close: "Fechar",
+      cancel: "Cancelar",
+      saving: "Salvando…",
+      create: "Criar alerta",
+      routeLegend: "Rota",
+      origin: "Origem",
+      destination: "Destino",
+      routeHint: "As opções são limitadas às rotas que o app monitora.",
+      cabinLegend: "Classes de cabine",
+      dateLegend: "Datas",
+      dateAny: "Qualquer data",
+      dateFixed: "Data fixa",
+      dateRange: "Período",
+      anyHint: "Me avise sempre que abrirem assentos-prêmio em qualquer data.",
+      dateLabel: "Data",
+      fromLabel: "De",
+      toLabel: "Até",
+    },
+    errors: {
+      chooseRoute: "Escolha uma origem e um destino.",
+      sameRoute: "Origem e destino devem ser diferentes.",
+      routeNotMonitored: "Essa rota ainda não está na lista monitorada.",
+      pickCabin: "Escolha pelo menos uma cabine.",
+      validDate: "Escolha uma data válida.",
+      startEnd: "Escolha data de início e fim.",
+      startBeforeEnd: "A data de início deve ser anterior ou igual à de fim.",
+      limitTemplate: "Seu plano cobre {limit} alertas. Remova um, ou {upsell}.",
+      upsellFree: "vá de Premium pra mais, ou Pro pra ilimitado",
+      upsellPaid: "vá de Pro pra ilimitado",
+      saveFailed: "Não foi possível salvar o alerta. Tente de novo.",
+    },
   },
 };

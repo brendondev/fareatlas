@@ -4,24 +4,30 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useActionState } from "react";
 import { AIRPORTS, formatAirport } from "@/lib/airports";
 import { createAlert, type CreateAlertState } from "@/lib/actions/alerts";
+import type { Dictionary } from "@/lib/i18n";
 
-const CABINS = [
-  { value: "first", label: "First" },
-  { value: "business", label: "Business" },
-  { value: "premium", label: "Premium Economy" },
-  { value: "economy", label: "Economy" },
-] as const;
+type ModalDict = Dictionary["alerts"]["modal"];
+type CabinLabels = Dictionary["common"]["cabins"];
+
+// Display order; labels come from the (translated) cabin dictionary.
+const CABIN_ORDER = ["first", "business", "premium", "economy"] as const;
 
 type DateMode = "any" | "fixed" | "range";
 
 /** Trigger + modal in one file; the button owns the state so consumers just
- *  drop `<NewAlertModal />` where they want the CTA to appear. */
+ *  drop `<NewAlertModal />` where they want the CTA to appear. Copy is passed
+ *  in (`dict`, `cabins`) because this is a client component and can't reach the
+ *  server-only dictionary loader. */
 export function NewAlertModal({
-  label = "New alert",
+  label,
   variant = "accent",
+  dict,
+  cabins,
 }: {
-  label?: string;
+  label: string;
   variant?: "accent" | "secondary";
+  dict: ModalDict;
+  cabins: CabinLabels;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -34,12 +40,26 @@ export function NewAlertModal({
       >
         <span aria-hidden>+</span> {label}
       </button>
-      {open ? <AlertDialog onClose={() => setOpen(false)} /> : null}
+      {open ? (
+        <AlertDialog
+          cabinLabels={cabins}
+          dict={dict}
+          onClose={() => setOpen(false)}
+        />
+      ) : null}
     </>
   );
 }
 
-function AlertDialog({ onClose }: { onClose: () => void }) {
+function AlertDialog({
+  onClose,
+  dict,
+  cabinLabels,
+}: {
+  onClose: () => void;
+  dict: ModalDict;
+  cabinLabels: CabinLabels;
+}) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -106,10 +126,10 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-start justify-between gap-4">
           <h2 className="font-display text-xl font-semibold" id={titleId}>
-            New flight alert
+            {dict.title}
           </h2>
           <button
-            aria-label="Close"
+            aria-label={dict.close}
             className="grid size-9 place-items-center rounded-full text-[var(--muted)] hover:bg-[var(--soft)] hover:text-[var(--ink)]"
             onClick={onClose}
             type="button"
@@ -121,11 +141,11 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
         <form action={formAction} className="mt-5 space-y-5">
           <fieldset>
             <legend className="text-sm font-semibold text-[var(--ink)]">
-              Route
+              {dict.routeLegend}
             </legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2">
               <label className="text-xs font-semibold text-[var(--muted)]">
-                Origin
+                {dict.origin}
                 <select
                   className="mt-1 h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--soft)] px-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)]"
                   name="origin"
@@ -141,7 +161,7 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
                 </select>
               </label>
               <label className="text-xs font-semibold text-[var(--muted)]">
-                Destination
+                {dict.destination}
                 <select
                   className="mt-1 h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--soft)] px-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)]"
                   name="destination"
@@ -158,18 +178,17 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
               </label>
             </div>
             <p className="mt-2 flex items-center gap-1 text-xs text-[var(--muted)]">
-              <span aria-hidden>ⓘ</span> Options are limited to routes the app
-              monitors.
+              <span aria-hidden>ⓘ</span> {dict.routeHint}
             </p>
           </fieldset>
 
           <fieldset>
             <legend className="text-sm font-semibold text-[var(--ink)]">
-              Cabin classes
+              {dict.cabinLegend}
             </legend>
             <div className="mt-2 flex flex-wrap gap-2">
-              {CABINS.map((cabin) => {
-                const active = cabins.has(cabin.value);
+              {CABIN_ORDER.map((value) => {
+                const active = cabins.has(value);
                 return (
                   <label
                     className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs font-semibold ${
@@ -177,17 +196,17 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
                         ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]"
                         : "border-[var(--line)] bg-[var(--soft)] text-[var(--muted)] hover:text-[var(--ink)]"
                     }`}
-                    key={cabin.value}
+                    key={value}
                   >
                     <input
                       checked={active}
                       className="sr-only"
                       name="cabin"
-                      onChange={() => toggleCabin(cabin.value)}
+                      onChange={() => toggleCabin(value)}
                       type="checkbox"
-                      value={cabin.value}
+                      value={value}
                     />
-                    {cabin.label}
+                    {cabinLabels[value]}
                   </label>
                 );
               })}
@@ -196,14 +215,14 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
 
           <fieldset>
             <legend className="text-sm font-semibold text-[var(--ink)]">
-              Dates
+              {dict.dateLegend}
             </legend>
             <div className="mt-2 grid gap-2 sm:grid-cols-3">
               {(
                 [
-                  { value: "any", label: "Any date" },
-                  { value: "fixed", label: "Fixed date" },
-                  { value: "range", label: "Date range" },
+                  { value: "any", label: dict.dateAny },
+                  { value: "fixed", label: dict.dateFixed },
+                  { value: "range", label: dict.dateRange },
                 ] as const
               ).map((option) => {
                 const active = dateMode === option.value;
@@ -231,14 +250,12 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
             </div>
 
             {dateMode === "any" ? (
-              <p className="mt-2 text-xs text-[var(--muted)]">
-                Notify me whenever award seats open on any date.
-              </p>
+              <p className="mt-2 text-xs text-[var(--muted)]">{dict.anyHint}</p>
             ) : null}
 
             {dateMode === "fixed" ? (
               <label className="mt-3 block text-xs font-semibold text-[var(--muted)]">
-                Date
+                {dict.dateLabel}
                 <input
                   className="mt-1 h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--soft)] px-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)]"
                   name="date"
@@ -251,7 +268,7 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
             {dateMode === "range" ? (
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <label className="text-xs font-semibold text-[var(--muted)]">
-                  From
+                  {dict.fromLabel}
                   <input
                     className="mt-1 h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--soft)] px-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)]"
                     name="startDate"
@@ -260,7 +277,7 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
                   />
                 </label>
                 <label className="text-xs font-semibold text-[var(--muted)]">
-                  To
+                  {dict.toLabel}
                   <input
                     className="mt-1 h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--soft)] px-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)]"
                     name="endDate"
@@ -284,14 +301,14 @@ function AlertDialog({ onClose }: { onClose: () => void }) {
               onClick={onClose}
               type="button"
             >
-              Cancel
+              {dict.cancel}
             </button>
             <button
               className="btn btn-accent h-10"
               disabled={pending || origin === destination || cabins.size === 0}
               type="submit"
             >
-              {pending ? "Saving…" : "Create alert"}
+              {pending ? dict.saving : dict.create}
             </button>
           </div>
         </form>
