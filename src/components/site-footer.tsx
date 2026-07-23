@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { SITE } from "@/lib/content";
+import type { Dictionary } from "@/lib/i18n";
 
-export function SiteFooter() {
+export function SiteFooter({ dict }: { dict: Dictionary["footer"] }) {
   return (
     // Footer recedes to a slightly cooler shade than the page (--background-deep
     // is a hair darker than --base) so it reads as an anchor without stealing
@@ -15,77 +16,72 @@ export function SiteFooter() {
           </p>
         </div>
         <div>
-          <p className="text-sm font-semibold text-[var(--ink)]">Product</p>
+          <p className="text-sm font-semibold text-[var(--ink)]">{dict.product}</p>
           <div className="mt-3 flex flex-col gap-2 text-sm text-[var(--muted)]">
             <Link className="hover:text-[var(--ink)]" href="/offers">
-              Offers
+              {dict.offers}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/flights">
-              Flights
+              {dict.flights}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/marketplace">
-              Marketplace
+              {dict.marketplace}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/partners">
-              Partners
+              {dict.partners}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/wine">
-              Wine
+              {dict.wine}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/gift-cards">
-              Gift cards
+              {dict.giftCards}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/cards">
-              Cards &amp; perks
+              {dict.cards}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/guides">
-              Guides
+              {dict.guides}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/perks">
-              Premium perks
+              {dict.premiumPerks}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/pricing">
-              Pricing
+              {dict.pricing}
             </Link>
           </div>
         </div>
         <div>
-          <p className="text-sm font-semibold text-[var(--ink)]">Company</p>
+          <p className="text-sm font-semibold text-[var(--ink)]">{dict.company}</p>
           <div className="mt-3 flex flex-col gap-2 text-sm text-[var(--muted)]">
             <Link className="hover:text-[var(--ink)]" href="/contact">
-              Contact
+              {dict.contact}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/privacy">
-              Privacy
+              {dict.privacy}
             </Link>
             <Link className="hover:text-[var(--ink)]" href="/terms">
-              Terms
+              {dict.terms}
             </Link>
           </div>
         </div>
         <div>
           <p className="text-sm font-semibold text-[var(--ink)]">
-            Australia-first
+            {dict.auFirstHeading}
           </p>
           <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            Built for Qantas, Velocity, Everyday Rewards and Flybuys — with cash
-            fares so you never burn points when dollars are smarter.
+            {dict.auFirstBody}
           </p>
         </div>
       </div>
       <div className="border-t border-[var(--line)]">
         <div className="container-wide space-y-3 py-5 text-xs text-[var(--muted)]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} {SITE.name}. All rights reserved.</p>
-            <p>Award data via Seats.aero · Cash comparison coming via Amadeus</p>
+            <p>
+              © {new Date().getFullYear()} {SITE.name}. {dict.rights}
+            </p>
+            <p>{dict.dataLine}</p>
           </div>
-          <p className="max-w-3xl leading-relaxed">
-            Not affiliated with or endorsed by Qantas, Virgin Australia,
-            Everyday Rewards, Flybuys or any airline or loyalty program. Trade
-            marks belong to their owners. Points prices and seat availability
-            change without notice — always confirm with the program before you
-            book or transfer.
-          </p>
+          <p className="max-w-3xl leading-relaxed">{dict.disclaimer}</p>
         </div>
       </div>
     </footer>

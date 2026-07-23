@@ -4,6 +4,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE } from "@/lib/content";
 import { getViewer } from "@/lib/dal";
+import { LOCALE_HTML_LANG } from "@/lib/i18n/config";
+import { getDictionary, getLocale } from "@/lib/i18n";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -77,7 +79,11 @@ export default async function RootLayout({
   //
   // This is NOT an auth boundary — layouts don't re-render on navigation. It
   // only decides which buttons to draw. Pages call the DAL themselves.
-  const viewer = await getViewer();
+  const [viewer, locale, dict] = await Promise.all([
+    getViewer(),
+    getLocale(),
+    getDictionary(),
+  ]);
 
   return (
     // `data-scroll-behavior` is required from Next 16 on: the framework no
@@ -86,12 +92,12 @@ export default async function RootLayout({
     <html
       className={`${jakarta.variable} ${inter.variable}`}
       data-scroll-behavior="smooth"
-      lang="en-AU"
+      lang={LOCALE_HTML_LANG[locale]}
     >
       <body>
-        <SiteHeader viewer={viewer} />
+        <SiteHeader dict={dict} locale={locale} viewer={viewer} />
         {children}
-        <SiteFooter />
+        <SiteFooter dict={dict.footer} />
       </body>
     </html>
   );

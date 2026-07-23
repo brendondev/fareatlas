@@ -3,48 +3,61 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { LanguageToggle } from "@/components/language-toggle";
 import { SITE } from "@/lib/content";
 import type { Viewer } from "@/lib/dal";
-
-// "Earn" groups the accumulation verticals — seven flat links overflowed the
-// bar, and these belong together conceptually (ways to earn points on spend).
-const EARN = [
-  { href: "/offers", label: "Offers", hint: "Bonus point promotions" },
-  { href: "/wine", label: "Wine", hint: "Ranked by cost per 1,000 points" },
-  { href: "/gift-cards", label: "Gift cards", hint: "Best points per dollar" },
-  { href: "/cards", label: "Cards & perks", hint: "Sign-up bonuses" },
-];
-
-const NAV = [
-  { href: "/flights", label: "Flights" },
-  // Alerts is inserted between Flights and Marketplace when auth is switched
-  // on — it's account-gated and would frustrate an anonymous click.
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/partners", label: "Partners" },
-  { href: "/perks", label: "Perks" },
-  { href: "/guides", label: "Guides" },
-  { href: "/pricing", label: "Pricing" },
-];
-
-const ALERTS_ITEM = { href: "/alerts", label: "Alerts" } as const;
+import type { Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n";
 
 /**
- * `viewer` arrives as a prop from the root layout: this is a client component
- * and must not reach into the DAL. It decides which buttons to draw, nothing
- * more — the pages themselves enforce access.
+ * `viewer`, `locale` and `dict` all arrive as props from the root layout: this
+ * is a client component and must not reach into the DAL or the (server-only)
+ * dictionary loader. It decides which buttons to draw and in which language,
+ * nothing more — the pages themselves enforce access.
+ *
+ * Labels come from `dict`; hrefs stay here (they don't translate).
  */
-export function SiteHeader({ viewer }: { viewer: Viewer }) {
+export function SiteHeader({
+  viewer,
+  locale,
+  dict,
+}: {
+  viewer: Viewer;
+  locale: Locale;
+  dict: Dictionary;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [earnOpen, setEarnOpen] = useState(false);
   const { authConfigured, user } = viewer;
-  const earnActive = EARN.some(
+
+  // "Earn" groups the accumulation verticals — seven flat links overflowed the
+  // bar, and these belong together conceptually (ways to earn points on spend).
+  const earn = [
+    { href: "/offers", ...dict.nav.earnItems.offers },
+    { href: "/wine", ...dict.nav.earnItems.wine },
+    { href: "/gift-cards", ...dict.nav.earnItems.giftCards },
+    { href: "/cards", ...dict.nav.earnItems.cards },
+  ];
+
+  const baseNav = [
+    { href: "/flights", label: dict.nav.flights },
+    { href: "/marketplace", label: dict.nav.marketplace },
+    { href: "/partners", label: dict.nav.partners },
+    { href: "/perks", label: dict.nav.perks },
+    { href: "/guides", label: dict.nav.guides },
+    { href: "/pricing", label: dict.nav.pricing },
+  ];
+  const alertsItem = { href: "/alerts", label: dict.nav.alerts };
+
+  const earnActive = earn.some(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
   );
-  // Inject Alerts right after Flights when auth is switched on.
+  // Inject Alerts right after Flights when auth is switched on — it's
+  // account-gated and would frustrate an anonymous click.
   const nav = authConfigured
-    ? [NAV[0]!, ALERTS_ITEM, ...NAV.slice(1)]
-    : NAV;
+    ? [baseNav[0]!, alertsItem, ...baseNav.slice(1)]
+    : baseNav;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(255,255,255,0.82)] backdrop-blur-xl">
@@ -58,7 +71,7 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
               {SITE.name}
             </span>
             <span className="hidden text-[11px] font-medium text-[var(--muted)] sm:block">
-              Points · cash · awards
+              {dict.header.tagline}
             </span>
           </span>
         </Link>
@@ -80,7 +93,7 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
               onClick={() => setEarnOpen((v) => !v)}
               type="button"
             >
-              Earn
+              {dict.nav.earn}
               <span aria-hidden className="text-[10px]">
                 ▾
               </span>
@@ -88,7 +101,7 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
             {earnOpen ? (
               <div className="absolute left-0 top-full w-64 pt-2">
                 <div className="rounded-2xl border border-[var(--line)] bg-[var(--panel)] p-2 shadow-[var(--shadow)]">
-                  {EARN.map((item) => (
+                  {earn.map((item) => (
                     <Link
                       className="block rounded-xl px-3 py-2 hover:bg-[var(--soft)]"
                       href={item.href}
@@ -128,40 +141,41 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <LanguageToggle current={locale} />
           {!authConfigured ? (
             // No accounts on this deployment. Show the old CTAs rather than a
             // disabled "Sign in", which would imply a broken feature.
             <>
               <Link className="btn btn-secondary h-10" href="/flights">
-                Search seats
+                {dict.header.searchSeats}
               </Link>
               <Link className="btn btn-accent h-10" href="/offers">
-                Browse offers
+                {dict.header.browseOffers}
               </Link>
             </>
           ) : user ? (
             <>
               <Link className="btn btn-secondary h-10" href="/flights">
-                Search seats
+                {dict.header.searchSeats}
               </Link>
               <Link className="btn btn-accent h-10" href="/account">
-                Account
+                {dict.header.account}
               </Link>
             </>
           ) : (
             <>
               <Link className="btn btn-ghost h-10" href="/login">
-                Sign in
+                {dict.header.signIn}
               </Link>
               <Link className="btn btn-accent h-10" href="/register">
-                Get started
+                {dict.header.getStarted}
               </Link>
             </>
           )}
         </div>
 
         <button
-          aria-label="Menu"
+          aria-label={dict.header.menu}
           className="grid size-10 place-items-center rounded-xl border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)] md:hidden"
           onClick={() => setOpen((v) => !v)}
           type="button"
@@ -174,9 +188,9 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
         <div className="border-t border-[var(--line)] bg-[var(--panel)] px-4 py-4 md:hidden">
           <div className="flex flex-col gap-1">
             <p className="px-3 pt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
-              Earn
+              {dict.nav.earn}
             </p>
-            {EARN.map((item) => (
+            {earn.map((item) => (
               <Link
                 className="rounded-xl px-3 py-3 text-sm font-medium hover:bg-[var(--soft)]"
                 href={item.href}
@@ -204,7 +218,7 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
                   href="/account"
                   onClick={() => setOpen(false)}
                 >
-                  Account
+                  {dict.header.account}
                 </Link>
               ) : (
                 <>
@@ -213,14 +227,14 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
                     href="/login"
                     onClick={() => setOpen(false)}
                   >
-                    Sign in
+                    {dict.header.signIn}
                   </Link>
                   <Link
                     className="btn btn-accent mt-2"
                     href="/register"
                     onClick={() => setOpen(false)}
                   >
-                    Get started
+                    {dict.header.getStarted}
                   </Link>
                 </>
               )
@@ -230,9 +244,16 @@ export function SiteHeader({ viewer }: { viewer: Viewer }) {
                 href="/flights"
                 onClick={() => setOpen(false)}
               >
-                Search award seats
+                {dict.header.searchAwardSeats}
               </Link>
             )}
+
+            <div className="mt-3 flex items-center justify-between border-t border-[var(--line)] pt-3">
+              <span className="px-3 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                {dict.header.language}
+              </span>
+              <LanguageToggle current={locale} />
+            </div>
           </div>
         </div>
       ) : null}
