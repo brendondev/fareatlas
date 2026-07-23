@@ -54,10 +54,14 @@ model User {
   ///
   /// `tier` above stays the source of truth the app reads for entitlements;
   /// these columns are the audit trail and the keys the webhook joins on.
-  /// stripeCustomerId is @unique but every existing row is NULL, and Postgres
-  /// permits many NULLs under a unique constraint, so the constraint applies
-  /// cleanly to a live table.
-  stripeCustomerId       String?   @unique
+  ///
+  /// Deliberately NOT @unique on stripeCustomerId — same reasoning as
+  /// AwardWatch.unsubToken: adding a unique constraint to a populated table
+  /// trips `db push`'s data-loss gate, which db-setup.mjs will not override.
+  /// Uniqueness is enforced in code instead (ensureCustomer mints one customer
+  /// per account), and the webhook looks the column up with findFirst, so an
+  /// index is all it needs.
+  stripeCustomerId       String?
   stripeSubscriptionId   String?
   stripePriceId          String?
   stripeStatus           String? // active | trialing | past_due | canceled | ...
@@ -79,6 +83,7 @@ model User {
   tokens   AuthToken[]
 
   @@index([tier])
+  @@index([stripeCustomerId])
 }
 
 /// Programs a user follows — the "my programs" list on /account.
