@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { startCheckout } from "@/lib/actions/billing";
-import type { PRICING } from "@/lib/content";
+import type { Dictionary } from "@/lib/i18n";
 
-type Plan = (typeof PRICING)[keyof typeof PRICING];
+type Plan = Dictionary["plans"][keyof Dictionary["plans"]];
+type PricingLabels = Dictionary["pricing"];
 type Interval = "month" | "year";
 
 /** Formatted price strings per paid tier, per interval — computed on the server
@@ -17,15 +18,20 @@ export type PriceLabels = Record<string, Record<Interval, string | null>>;
  * Paid cards post to the `startCheckout` server action, which resolves the
  * (tier, interval) to a Stripe price and redirects to Checkout — the client
  * never handles a price ID or a card number.
+ *
+ * All copy comes from `labels` (the pricing dictionary slice) so the grid
+ * follows the viewer's language; only the plan tier drives layout emphasis.
  */
 export function PricingPlans({
   plans,
   priceLabels,
   signedIn,
+  labels,
 }: {
   plans: Plan[];
   priceLabels: PriceLabels;
   signedIn: boolean;
+  labels: PricingLabels;
 }) {
   const [interval, setInterval] = useState<Interval>("month");
 
@@ -37,14 +43,14 @@ export function PricingPlans({
             aria-pressed={interval === value}
             className={`rounded-full px-4 py-1.5 font-semibold transition ${
               interval === value
-                ? "bg-[var(--accent)] text-[#0b0d10]"
+                ? "bg-[var(--accent)] text-white"
                 : "text-[var(--muted)] hover:text-[var(--ink)]"
             }`}
             key={value}
             onClick={() => setInterval(value)}
             type="button"
           >
-            {value === "month" ? "Monthly" : "Annual"}
+            {value === "month" ? labels.monthly : labels.annual}
           </button>
         ))}
       </div>
@@ -54,6 +60,7 @@ export function PricingPlans({
           <PlanCard
             interval={interval}
             key={plan.tier}
+            labels={labels}
             plan={plan}
             priceLabel={priceLabels[plan.tier]?.[interval] ?? null}
             signedIn={signedIn}
@@ -69,14 +76,17 @@ function PlanCard({
   interval,
   priceLabel,
   signedIn,
+  labels,
 }: {
   plan: Plan;
   interval: Interval;
   priceLabel: string | null;
   signedIn: boolean;
+  labels: PricingLabels;
 }) {
   const isFree = plan.tier === "free";
-  const highlighted = plan.highlighted;
+  const highlighted = plan.tier === "premium";
+  const perLabel = interval === "month" ? labels.perMonth : labels.perYear;
 
   return (
     <article
@@ -103,7 +113,7 @@ function PlanCard({
         {isFree ? "$0" : (priceLabel ?? "—")}
         {!isFree && priceLabel ? (
           <span className="text-base font-medium text-[var(--muted)]">
-            /{interval === "month" ? "mo" : "yr"}
+            /{perLabel}
           </span>
         ) : null}
       </p>
@@ -111,12 +121,14 @@ function PlanCard({
         {isFree
           ? plan.periodHint
           : priceLabel
-            ? `Billed ${interval === "month" ? "monthly" : "yearly"}`
+            ? interval === "month"
+              ? labels.billedMonthly
+              : labels.billedYearly
             : plan.periodHint}
       </p>
 
       <p className="relative mt-6 text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
-        What you get
+        {labels.whatYouGet}
       </p>
       <ul className="relative mt-3 space-y-2.5 text-sm">
         {plan.includes.map((item) => (
@@ -130,7 +142,7 @@ function PlanCard({
       {plan.locked.length ? (
         <>
           <p className="relative mt-6 text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
-            Upgrade unlocks
+            {labels.upgradeUnlocks}
           </p>
           <ul className="relative mt-3 space-y-2.5 text-sm">
             {plan.locked.map((item) => (
@@ -145,10 +157,12 @@ function PlanCard({
 
       <div className="relative mt-8 pt-2">
         <CardCta
-          interval={interval}
-          isFree={isFree}
           available={Boolean(priceLabel)}
           highlighted={highlighted}
+          interval={interval}
+          isFree={isFree}
+          labels={labels}
+          planName={plan.name}
           signedIn={signedIn}
           tier={plan.tier}
         />
@@ -160,22 +174,29 @@ function PlanCard({
 function CardCta({
   isFree,
   tier,
+  planName,
   interval,
   available,
   highlighted,
   signedIn,
+  labels,
 }: {
   isFree: boolean;
   tier: string;
+  planName: string;
   interval: Interval;
   available: boolean;
   highlighted: boolean;
   signedIn: boolean;
+  labels: PricingLabels;
 }) {
   if (isFree) {
     return (
-      <Link className="btn btn-secondary w-full" href={signedIn ? "/flights" : "/register"}>
-        {signedIn ? "Go to search" : "Start free"}
+      <Link
+        className="btn btn-secondary w-full"
+        href={signedIn ? "/flights" : "/register"}
+      >
+        {signedIn ? labels.goToSearch : labels.startFree}
       </Link>
     );
   }
@@ -183,7 +204,7 @@ function CardCta({
   if (!available) {
     return (
       <button className="btn btn-secondary w-full" disabled type="button">
-        Unavailable
+        {labels.unavailable}
       </button>
     );
   }
@@ -196,7 +217,7 @@ function CardCta({
         className={`btn w-full ${highlighted ? "btn-accent" : "btn-secondary"}`}
         href="/register?next=/pricing"
       >
-        Create account to upgrade
+        {labels.createAccountToUpgrade}
       </Link>
     );
   }
@@ -209,7 +230,7 @@ function CardCta({
         className={`btn w-full ${highlighted ? "btn-accent" : "btn-secondary"}`}
         type="submit"
       >
-        Upgrade to {tier === "pro" ? "Pro" : "Premium"}
+        {labels.upgradeTo} {planName}
       </button>
     </form>
   );
