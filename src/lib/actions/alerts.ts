@@ -108,9 +108,13 @@ export async function createAlert(
       where: { userId: user!.id, status: "active" },
     });
     if (existing >= limit) {
+      const upsell =
+        tier === "free"
+          ? "go Premium for more, or Pro for unlimited"
+          : "go Pro for unlimited";
       return {
         ok: false,
-        error: `The free plan covers ${limit} alerts. Remove one, or go Premium for unlimited.`,
+        error: `Your plan covers ${limit} alerts. Remove one, or ${upsell}.`,
       };
     }
   }

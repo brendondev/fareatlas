@@ -11,7 +11,9 @@ export const metadata: Metadata = {
 
 export default async function GuidesPage() {
   const [guides, viewer] = await Promise.all([getGuides(), getViewer()]);
-  const isPremium = viewer.tier === "premium";
+  // A guide is "premium" (paid-gated); any paid tier — Premium or Pro — unlocks
+  // it. Only free is locked out.
+  const isPaid = viewer.tier !== "free";
 
   return (
     <main className="container-page py-12 sm:py-16">
@@ -27,7 +29,7 @@ export default async function GuidesPage() {
       {guides.length ? (
         <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {guides.map((guide) => {
-            const locked = guide.tier === "premium" && !isPremium;
+            const locked = guide.tier === "premium" && !isPaid;
             return (
               <Link
                 className="card group flex flex-col p-5 transition hover:border-[var(--line-strong)]"

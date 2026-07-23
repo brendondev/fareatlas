@@ -22,7 +22,7 @@ type SearchResponse = {
     hitCount?: number;
   };
   entitlements?: {
-    tier?: "free" | "premium";
+    tier?: "free" | "premium" | "pro";
     clamped?: { cabins: boolean; startDate: boolean; endDate: boolean };
     clampedAtAll?: boolean;
   };
@@ -80,7 +80,7 @@ export function AwardSearch({
   signedIn,
 }: {
   configured: boolean;
-  tier: "free" | "premium";
+  tier: "free" | "premium" | "pro";
   signedIn: boolean;
 }) {
   const defaults = useMemo(

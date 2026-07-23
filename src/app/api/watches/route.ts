@@ -59,9 +59,15 @@ export async function POST(request: NextRequest) {
       });
 
       if (existing >= limit) {
+        // Free points at Premium; Premium (also capped) points at Pro, which is
+        // the only tier with an unlimited allowance.
+        const upsell =
+          viewer.tier === "free"
+            ? "go Premium for more, or Pro for unlimited"
+            : "go Pro for unlimited";
         return NextResponse.json(
           {
-            error: `The free plan covers ${limit} watched routes. Remove one, or go Premium for unlimited.`,
+            error: `Your plan covers ${limit} watched routes. Remove one, or ${upsell}.`,
             tier: viewer.tier,
             limit,
           },

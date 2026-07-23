@@ -37,15 +37,31 @@ model User {
   passwordHash String
   name         String?
 
-  /// free | premium. A String rather than an enum, matching Offer.status and
-  /// AwardWatch.status. Narrowed in TS at the DAL boundary, where anything
+  /// free | premium | pro. A String rather than an enum, matching Offer.status
+  /// and AwardWatch.status. Narrowed in TS at the DAL boundary, where anything
   /// unrecognised fails closed to "free".
   ///
-  /// There is no billing yet, so nothing in the app writes this — premium is
-  /// granted by hand in the Neon console. tierNote records why.
+  /// The Stripe webhook is now the primary writer (a paid checkout flips this,
+  /// a cancellation/failure flips it back to "free"). scripts/grant-tier.mjs
+  /// still writes it by hand for comp accounts; tierNote records why.
   tier      String    @default("free")
   tierNote  String?
   tierSince DateTime?
+
+  /// Stripe billing linkage. All nullable: a Free account that never checked
+  /// out has none of these, and adding them to a populated table is a no-op
+  /// (see db-setup.mjs, which runs `db push` without --accept-data-loss).
+  ///
+  /// `tier` above stays the source of truth the app reads for entitlements;
+  /// these columns are the audit trail and the keys the webhook joins on.
+  /// stripeCustomerId is @unique but every existing row is NULL, and Postgres
+  /// permits many NULLs under a unique constraint, so the constraint applies
+  /// cleanly to a live table.
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?
+  stripePriceId          String?
+  stripeStatus           String? // active | trialing | past_due | canceled | ...
+  stripeCurrentPeriodEnd DateTime?
 
   /// Unused until the email phase. Shipped now so that adding it later doesn't
   /// mean altering a table that by then holds real accounts.
@@ -110,13 +126,29 @@ model RateLimit {
   @@index([windowStart])
 }
 
-/// Premium interest, captured on /pricing while billing does not exist.
+/// Premium interest, captured on /pricing when billing is not configured
+/// (isBillingConfigured() false) — the honest fallback for a deploy without
+/// Stripe keys. When billing is live the pricing CTAs go to Checkout instead.
 model PremiumWaitlist {
   id        String   @id @default(cuid())
   email     String   @unique
   userId    String?
   reason    String?
   createdAt DateTime @default(now())
+}
+
+/// Webhook idempotency ledger. Stripe delivers each event at least once and
+/// retries on any non-2xx, so the same event.id can arrive several times. The
+/// handler inserts the id here first; a duplicate insert (unique PK) means
+/// "already processed" and the handler returns 200 without re-applying it.
+/// Guards against, e.g., a retried subscription.deleted re-downgrading an
+/// account the user has since re-subscribed to.
+model StripeEvent {
+  id        String   @id // Stripe event id (evt_...)
+  type      String
+  createdAt DateTime @default(now())
+
+  @@index([type])
 }
 
 model Offer {

@@ -34,7 +34,7 @@ if (envFile) {
   config({ path: envFile });
 }
 
-const VALID_TIERS = ["free", "premium"];
+const VALID_TIERS = ["free", "premium", "pro"];
 
 const [, , emailArg, tierArg, ...noteParts] = process.argv;
 const email = emailArg?.trim().toLowerCase();
@@ -94,7 +94,7 @@ try {
     data: {
       tier,
       tierNote: note,
-      tierSince: tier === "premium" ? new Date() : null,
+      tierSince: tier === "free" ? null : new Date(),
     },
     select: { email: true, tier: true, tierSince: true },
   });

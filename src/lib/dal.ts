@@ -16,7 +16,7 @@ import { decrypt, SESSION_COOKIE } from "./session";
  * not reliably cover. Every page and action calls in here on its own.
  */
 
-export type Tier = "free" | "premium";
+export type Tier = "free" | "premium" | "pro";
 
 export type Viewer = {
   authConfigured: boolean;
@@ -32,7 +32,9 @@ const ANONYMOUS: Viewer = {
 
 /** Anything unrecognised fails closed to free. */
 function toTier(value: string): Tier {
-  return value === "premium" ? "premium" : "free";
+  if (value === "pro") return "pro";
+  if (value === "premium") return "premium";
+  return "free";
 }
 
 /** Reads and verifies the cookie. No database access. */

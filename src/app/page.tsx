@@ -323,15 +323,22 @@ export default async function HomePage() {
       {/* Pricing teaser */}
       <section className="container-wide py-16" id="pricing">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="section-title">Start free. Go Premium when ready.</h2>
+          <h2 className="section-title">Start free. Upgrade when ready.</h2>
           <p className="section-lead mx-auto">
-            Browse offers free forever. Upgrade later for every cabin, longer
-            award windows and unlimited alerts.
+            Browse offers free forever. Premium opens every cabin, the full
+            award window and email alerts; Pro adds unlimited routes and
+            priority alerts.
           </p>
         </div>
-        <div className="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2">
+        <div className="mx-auto mt-10 grid max-w-5xl gap-5 md:grid-cols-3">
           <PricingCard plan={PRICING.free} highlighted={false} />
           <PricingCard plan={PRICING.premium} highlighted />
+          <PricingCard plan={PRICING.pro} highlighted={false} />
+        </div>
+        <div className="mt-8 text-center">
+          <Link className="btn btn-accent" href="/pricing">
+            See full pricing
+          </Link>
         </div>
       </section>
 
@@ -401,9 +408,13 @@ function PricingCard({
         {plan.name}
       </p>
       <p className="relative mt-2 font-display text-3xl font-semibold tracking-tight">
-        {plan.price}
+        {plan.tier === "free" ? "$0" : plan.periodHint}
       </p>
-      <p className="relative mt-1 text-sm text-[var(--muted)]">{plan.period}</p>
+      {plan.tier === "free" ? (
+        <p className="relative mt-1 text-sm text-[var(--muted)]">
+          {plan.periodHint}
+        </p>
+      ) : null}
       <ul className="relative mt-6 space-y-2.5 text-sm">
         {plan.includes.map((item) => (
           <li className="flex gap-2" key={item}>
@@ -411,23 +422,13 @@ function PricingCard({
             <span className="text-[var(--ink-soft)]">{item}</span>
           </li>
         ))}
-        {"locked" in plan
-          ? plan.locked.map((item) => (
-              <li className="flex gap-2 text-[var(--muted)]" key={item}>
-                <span>○</span>
-                <span>{item}</span>
-              </li>
-            ))
-          : null}
+        {plan.locked.map((item) => (
+          <li className="flex gap-2 text-[var(--muted)]" key={item}>
+            <span>○</span>
+            <span>{item}</span>
+          </li>
+        ))}
       </ul>
-      <Link
-        className={`btn relative mt-8 w-full ${
-          highlighted ? "btn-accent" : "btn-secondary"
-        }`}
-        href={plan.href}
-      >
-        {plan.cta}
-      </Link>
     </article>
   );
 }

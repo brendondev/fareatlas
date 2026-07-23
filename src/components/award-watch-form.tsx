@@ -14,7 +14,7 @@ export function AwardWatchForm({
   tier,
 }: {
   signedIn: boolean;
-  tier: "free" | "premium";
+  tier: "free" | "premium" | "pro";
 }) {
   const [origin, setOrigin] = useState("SYD");
   const [destination, setDestination] = useState("HND");
@@ -62,9 +62,9 @@ export function AwardWatchForm({
       </h3>
       <p className="mt-2 text-sm text-[var(--muted)]">
         We check in the background and alert you.{" "}
-        {tier === "premium"
-          ? "Every cabin on your plan."
-          : "Economy on Free — Premium opens every cabin."}
+        {tier === "free"
+          ? "Economy on Free — Premium opens every cabin."
+          : "Every cabin on your plan."}
       </p>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">

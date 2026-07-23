@@ -77,7 +77,8 @@ export default async function AlertsPage() {
           <p className="section-lead">
             Manage the routes and dates you want award-seat alerts for.{" "}
             {alerts.length} of {limitLabel} on the{" "}
-            {tier === "premium" ? "Premium" : "Free"} plan.
+            {tier === "pro" ? "Pro" : tier === "premium" ? "Premium" : "Free"}{" "}
+            plan.
           </p>
         </div>
         {!atLimit ? <NewAlertModal label="New alert" /> : null}
@@ -150,19 +151,19 @@ export default async function AlertsPage() {
 
       {atLimit ? (
         <p className="mt-6 rounded-xl border border-dashed border-[var(--line-strong)] p-4 text-center text-sm text-[var(--muted)]">
-          You&apos;re at the {limitLabel}-alert limit on Free. Remove one, or
-          {" "}
+          You&apos;re at the {limitLabel}-alert limit on{" "}
+          {tier === "premium" ? "Premium" : "Free"}. Remove one, or{" "}
           <a className="text-[var(--accent)] hover:underline" href="/pricing">
-            go Premium
+            {tier === "premium" ? "go Pro" : "upgrade"}
           </a>{" "}
-          for unlimited.
+          for {tier === "premium" ? "unlimited" : "more"}.
         </p>
       ) : null}
 
       <p className="mt-6 text-xs leading-relaxed text-[var(--muted)]">
-        We check your alerts in the background and email you when seats open —
-        Economy on Free, every cabin on Premium. Availability moves fast, so
-        confirm with the program before you rely on it.
+        {entitlementsFor(tier).emailAlerts
+          ? "We check your alerts in the background and email you when seats open — every cabin on your plan. Availability moves fast, so confirm with the program before you rely on it."
+          : "We check your alerts in the background and flag seats here as they open — Economy on Free. Email alerts on your routes come with Premium and Pro. Availability moves fast, so confirm with the program before you rely on it."}
         {isEmailConfigured()
           ? ""
           : " Email delivery isn't switched on yet, so alerts show here rather than in your inbox for now."}

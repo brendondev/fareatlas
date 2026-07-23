@@ -6,7 +6,12 @@ import { filterResultsForTier } from "./awards";
 import { type Tier } from "./dal";
 import { prisma } from "./db";
 import { isEmailConfigured, sendEmail } from "./email";
-import { cabinAllowed, clampSearch, normalizeCabin } from "./entitlements";
+import {
+  cabinAllowed,
+  clampSearch,
+  entitlementsFor,
+  normalizeCabin,
+} from "./entitlements";
 import {
   awardCacheDayKey,
   mapSearchResults,
@@ -15,8 +20,14 @@ import {
 import type { AwardResult, CachedSearchParams } from "./seats-aero";
 import { siteUrl } from "./site-url";
 
-const CHECK_THRESHOLD_MIN = 30; // a route is re-searched at most this often
-const COOLDOWN_HOURS = 6; // at most one email per watch per this window
+// The tightest cadence any tier buys (Pro = 15 min). The cron pulls everything
+// due under this floor, then each watch is held to *its own* tier's threshold
+// in code — so a Free route (60 min) fetched here is skipped until its time.
+const MIN_CHECK_THRESHOLD_MIN = Math.min(
+  ...(["free", "premium", "pro"] as const).map(
+    (tier) => entitlementsFor(tier).checkThresholdMin,
+  ),
+);
 const DEFAULT_BATCH = 60; // bound work per cron run
 
 // --- orchestrator ---
@@ -31,6 +42,7 @@ type WatchRow = {
   programs: string | null;
   startDate: Date | null;
   endDate: Date | null;
+  lastCheckedAt: Date | null;
   lastSeenJson: string | null;
   lastNotifiedAt: Date | null;
   unsubToken: string | null;
@@ -47,7 +59,9 @@ export type AlertsSummary = {
 };
 
 function toTier(value: string | undefined): Tier {
-  return value === "premium" ? "premium" : "free";
+  if (value === "pro") return "pro";
+  if (value === "premium") return "premium";
+  return "free";
 }
 
 /** The cabins a watch actually wants AND its owner's tier permits. */
@@ -89,7 +103,9 @@ export async function runAwardAlerts(options?: {
   const limit = options?.limit ?? DEFAULT_BATCH;
   const force = options?.force ?? false;
   const now = new Date();
-  const dueBefore = new Date(now.getTime() - CHECK_THRESHOLD_MIN * 60 * 1000);
+  const dueBefore = new Date(
+    now.getTime() - MIN_CHECK_THRESHOLD_MIN * 60 * 1000,
+  );
   const today = awardCacheDayKey();
 
   // Signed-in, active watches that are due. Anonymous (userId null) watches are
@@ -112,6 +128,7 @@ export async function runAwardAlerts(options?: {
       programs: true,
       startDate: true,
       endDate: true,
+      lastCheckedAt: true,
       lastSeenJson: true,
       lastNotifiedAt: true,
       unsubToken: true,
@@ -143,6 +160,16 @@ export async function runAwardAlerts(options?: {
     };
     const { params } = clampSearch(raw, tier, today);
     return { watch, tier, params };
+  })
+  // The query pulled everything due under the tightest cadence (Pro). Hold each
+  // watch to its own tier's threshold so a Free route isn't re-searched every
+  // 15 minutes just because a Pro route shares this batch.
+  .filter(({ watch, tier }) => {
+    if (!watch.lastCheckedAt) return true; // never checked → always due
+    const dueAt =
+      watch.lastCheckedAt.getTime() +
+      entitlementsFor(tier).checkThresholdMin * 60 * 1000;
+    return now.getTime() >= dueAt;
   });
 
   const groups = new Map<string, { params: CachedSearchParams; results: AwardResult[]; tier: Tier }>();
@@ -198,12 +225,17 @@ export async function runAwardAlerts(options?: {
       data.lastHitAt = now;
       data.lastHitSummary = hitSummary;
 
+      // Email is a paid lever: Free surfaces the hit in-app (lastHitAt above)
+      // but is never emailed. Cooldown length is per-tier — Pro hears again
+      // sooner if a seat keeps reappearing.
+      const plan = entitlementsFor(tier);
       const cooldownOk =
         !watch.lastNotifiedAt ||
-        watch.lastNotifiedAt.getTime() < now.getTime() - COOLDOWN_HOURS * 3600 * 1000;
+        watch.lastNotifiedAt.getTime() <
+          now.getTime() - plan.cooldownHours * 3600 * 1000;
       const recipient = watch.user?.email ?? watch.email;
 
-      if (isEmailConfigured() && cooldownOk && recipient) {
+      if (plan.emailAlerts && isEmailConfigured() && cooldownOk && recipient) {
         // Lazily ensure an unsubscribe token before the link goes out.
         let token = watch.unsubToken;
         if (!token) {

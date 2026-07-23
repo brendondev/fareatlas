@@ -26,14 +26,15 @@ const HERO_PERKS = [
   },
   {
     icon: "alerts",
-    title: "Alerts on every route you want",
-    body: "Drop the three-alert cap. Watch as many city pairs and date ranges as you actually fly, in every cabin your points can reach.",
+    title: "More alerts, every cabin",
+    body: "Lift the three-alert cap to 15 routes on Premium — or go unlimited on Pro — across every cabin your points can reach, with email when seats open.",
   },
 ] as const;
 
 export default async function PerksPage() {
   const viewer = await getViewer();
-  const isPremium = viewer.tier === "premium";
+  const isPaid = viewer.tier !== "free";
+  const planLabel = viewer.tier === "pro" ? "Pro" : "Premium";
 
   return (
     <main className="container-page py-12 sm:py-16">
@@ -74,7 +75,7 @@ export default async function PerksPage() {
             {PRICING.premium.name}
           </h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            {PRICING.premium.period}
+            {PRICING.premium.periodHint}
           </p>
           <ul className="mt-6 space-y-3 text-sm">
             {PRICING.premium.includes.map((item) => (
@@ -92,17 +93,18 @@ export default async function PerksPage() {
         </div>
 
         <aside className="card p-6 sm:p-8">
-          {isPremium ? (
+          {isPaid ? (
             <>
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--good)]">
                 Your account
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold text-[var(--ink)]">
-                You&apos;re on Premium
+                You&apos;re on {planLabel}
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-                Every cabin, the full year, unlimited alerts. Search away —
-                Seats.aero calls are on us.
+                {viewer.tier === "pro"
+                  ? "Every cabin, the full year, unlimited alerts and priority checks. Search away — Seats.aero calls are on us."
+                  : "Every cabin, the full year and email alerts on your routes. Search away — Seats.aero calls are on us."}
               </p>
               <Link className="btn btn-accent mt-6 w-full" href="/flights">
                 Open award search
@@ -114,18 +116,18 @@ export default async function PerksPage() {
                 Get started
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold text-[var(--ink)]">
-                Premium is on the waitlist
+                Pick your plan
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-                Billing isn&apos;t live yet — we&apos;re prioritising the seat
-                data pipeline before we start charging. Join the waitlist and
-                you&apos;ll be first in when it opens.
+                Premium opens every cabin, the full year and email alerts. Pro
+                adds unlimited routes and priority alerts. The offers side stays
+                free forever.
               </p>
               <Link className="btn btn-accent mt-6 w-full" href="/pricing">
-                Join the waitlist
+                See plans
               </Link>
               <p className="mt-4 text-center text-xs text-[var(--muted)]">
-                No card required.
+                Start free — no card required.
               </p>
             </>
           )}

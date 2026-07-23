@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AccountNav } from "@/components/account-nav";
+import { openBillingPortal } from "@/lib/actions/billing";
 import { logout } from "@/lib/actions/auth";
 import { isAuthConfigured } from "@/lib/auth-config";
+import { isBillingConfigured } from "@/lib/billing/plans";
 import { requireUser } from "@/lib/dal";
 import { prisma } from "@/lib/db";
 
@@ -29,13 +31,36 @@ export default async function AccountPage() {
     })
     .catch(() => []);
 
+  // Billing snapshot for the "Your plan" panel. Null on any failure — the panel
+  // degrades to the plain tier label rather than erroring the whole page.
+  const billing = await prisma.user
+    .findUnique({
+      where: { id: user!.id },
+      select: {
+        stripeCustomerId: true,
+        stripeStatus: true,
+        stripeCurrentPeriodEnd: true,
+      },
+    })
+    .catch(() => null);
+
+  const paid = tier === "premium" || tier === "pro";
+  const planLabel = tier === "pro" ? "Pro" : tier === "premium" ? "Premium" : "Free";
+  const renews = billing?.stripeCurrentPeriodEnd
+    ? new Date(billing.stripeCurrentPeriodEnd).toLocaleDateString("en-AU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
   return (
     <main className="container-page py-12 sm:py-16">
       <AccountNav active="overview" />
       <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="pill text-[var(--accent)]">
-            {tier === "premium" ? "Premium" : "Free plan"}
+            {paid ? `${planLabel} plan` : "Free plan"}
           </span>
           <h1 className="section-title mt-4">
             {user!.name ? `Hello, ${user!.name}` : "Your account"}
@@ -100,13 +125,39 @@ export default async function AccountPage() {
         <section className="card p-6">
           <h2 className="font-display text-xl font-semibold">Your plan</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            {tier === "premium"
-              ? "Every cabin and the full 12-month award window."
-              : "Economy award search across the next 90 days, and every offer."}
+            {tier === "pro"
+              ? "Every cabin, the full year, unlimited routes and priority alerts."
+              : tier === "premium"
+                ? "Every cabin, the full 12-month window and email alerts."
+                : "Economy award search across the next 90 days, and every offer."}
           </p>
-          {tier === "free" ? (
+
+          {paid && renews ? (
+            <p className="mt-3 text-xs text-[var(--muted)]">
+              {billing?.stripeStatus === "past_due"
+                ? "Payment past due — update your card to keep your plan."
+                : `Renews ${renews}.`}
+            </p>
+          ) : null}
+
+          {paid && isBillingConfigured() && billing?.stripeCustomerId ? (
+            <form action={openBillingPortal}>
+              <button className="btn btn-secondary mt-5 w-full" type="submit">
+                Manage billing
+              </button>
+            </form>
+          ) : tier === "free" ? (
             <Link className="btn btn-accent mt-5 w-full" href="/pricing">
-              See Premium
+              See plans
+            </Link>
+          ) : null}
+
+          {tier === "premium" ? (
+            <Link
+              className="mt-3 block text-center text-xs text-[var(--accent)] hover:underline"
+              href="/pricing"
+            >
+              Compare with Pro
             </Link>
           ) : null}
         </section>

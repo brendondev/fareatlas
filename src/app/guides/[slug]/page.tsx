@@ -34,7 +34,8 @@ export default async function GuidePage({
   if (!guide) notFound();
 
   const viewer = await getViewer();
-  const locked = guide.tier === "premium" && viewer.tier !== "premium";
+  // Any paid tier (Premium or Pro) unlocks a premium guide; only free is gated.
+  const locked = guide.tier === "premium" && viewer.tier === "free";
 
   // The gate is here, BEFORE the body is read. A locked guide never calls
   // getGuideHtml, so the premium text never enters the DOM to be un-hidden.

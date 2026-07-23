@@ -2,27 +2,62 @@ import type { Tier } from "./dal";
 import type { CabinCode, CachedSearchParams } from "./seats-aero";
 
 /**
- * What each plan may ask Seats.aero for.
+ * What each plan may ask Seats.aero for, and how it is alerted.
  *
  * Pure and I/O-free on purpose: this is the rule everything else is measured
  * against, so it must be readable and testable on its own. `today` is passed
  * in rather than read here, both to keep that true and so the caller can use
  * the same Sydney calendar day the award cache keys on.
+ *
+ * The three billing tiers map straight onto these levers — a plan is worth
+ * more only because a column here says so. Adding Stripe changed *who* writes
+ * `User.tier`; it did not change that this table is the single source of what
+ * a tier means.
+ *
+ * Alert levers (`emailAlerts`, `checkThresholdMin`, `cooldownHours`) live here
+ * rather than as constants in alerts.ts so that "Pro checks faster" is a fact
+ * of the plan, not a magic number buried in the orchestrator.
  */
 export const ENTITLEMENTS = {
   free: {
     cabins: ["economy"] as CabinCode[],
     windowDays: 90,
     maxWatches: 3,
+    // Free surfaces hits in-app (lastHitAt on /account) but never emails —
+    // email is the first thing a paid plan buys, and the pricing copy says so.
+    emailAlerts: false,
+    checkThresholdMin: 60,
+    cooldownHours: 12,
   },
   premium: {
     cabins: ["economy", "premium", "business", "first"] as CabinCode[],
     windowDays: 365,
+    maxWatches: 15,
+    emailAlerts: true,
+    checkThresholdMin: 30,
+    cooldownHours: 6,
+  },
+  pro: {
+    cabins: ["economy", "premium", "business", "first"] as CabinCode[],
+    windowDays: 365,
     maxWatches: Number.POSITIVE_INFINITY,
+    emailAlerts: true,
+    // Pro's differentiator: routes are re-checked twice as often and the
+    // per-route email cooldown is half Premium's, so a Pro user hears about a
+    // seat sooner and more than once a window if it keeps reappearing.
+    checkThresholdMin: 15,
+    cooldownHours: 3,
   },
 } as const satisfies Record<
   Tier,
-  { cabins: CabinCode[]; windowDays: number; maxWatches: number }
+  {
+    cabins: CabinCode[];
+    windowDays: number;
+    maxWatches: number;
+    emailAlerts: boolean;
+    checkThresholdMin: number;
+    cooldownHours: number;
+  }
 >;
 
 export const ALL_CABINS: CabinCode[] = [

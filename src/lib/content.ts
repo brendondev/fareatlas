@@ -92,39 +92,61 @@ export const STEPS = [
   },
 ] as const;
 
+/**
+ * The three plans, as feature lists. Prices are NOT here on purpose: the amount
+ * charged is whatever the Stripe price says, and /pricing renders it live from
+ * Stripe so the page can never advertise a number the checkout won't honour.
+ * `periodHint` is display copy only. `tier` ties a card to lib/entitlements and
+ * (for paid tiers) to the Stripe price env vars via lib/billing/plans.
+ */
 export const PRICING = {
   free: {
+    tier: "free",
     name: "Free",
-    price: "$0",
-    period: "Forever free — no card",
-    cta: "Start free",
-    href: "/offers",
+    periodHint: "Forever free — no card",
+    highlighted: false,
     includes: [
       "All Qantas, Velocity, Everyday & Flybuys offers",
       "Marketplace, wine and gift-card style boosts",
       "Award seat search in Economy (next 90 days)",
-      "Cash fare watchlist samples",
-      "Starter points guides",
+      "Up to 3 watched routes, flagged in-app",
+      "Cash fare comparison beside the points",
     ],
     locked: [
       "Premium Economy, Business & First award search",
       "Full 12-month award window",
       "Route alerts by email",
-      "Expert guides & priority routes",
+      "More watched routes",
     ],
   },
   premium: {
+    tier: "premium",
     name: "Premium",
-    price: "Coming soon",
-    period: "Every cabin, the full year, every guide",
-    cta: "Join the waitlist",
-    href: "/pricing#waitlist",
+    periodHint: "Every cabin, the full year",
+    highlighted: true,
     includes: [
       "Everything in Free",
       "All cabins — Economy through First",
       "Full 12-month award search window",
+      "Email alerts on up to 15 watched routes",
       "Cash vs points decision helpers",
-      "Priority for new programs and tools",
+    ],
+    locked: [
+      "Unlimited watched routes",
+      "Priority alerts that check twice as often",
+    ],
+  },
+  pro: {
+    tier: "pro",
+    name: "Pro",
+    periodHint: "For the serious points chaser",
+    highlighted: false,
+    includes: [
+      "Everything in Premium",
+      "Unlimited watched routes",
+      "Priority alerts — routes re-checked every 15 min",
+      "Shorter alert cooldown, so you hear sooner",
+      "First access to new programs and tools",
     ],
     locked: [] as string[],
   },
